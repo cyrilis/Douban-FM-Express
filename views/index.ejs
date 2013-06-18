@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DoubanFm</title>
+	<link href="/skin/blue.monday/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts//jquery.jplayer.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jplayer.playlist.min.js"></script>
+	<script type="text/javascript">
+	//<![CDATA[
+	$(document).ready(function(){
+
+
+	});
+	//]]>
+	</script>
+</head>
+<body>
+
+
+<div id="jplayer" class="jp-jplayer"></div>
+
+		<iframe  frameborder="0" id="iframe">
+			
+		</iframe>
+		<script>
+		var $jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
+		$jp.jPlayer().jPlayer("setMedia", { // Set the media
+	      mp3: "http://mr3.douban.com/201306190252/9bc37e8298f772a84df59083a1f32dde/view/song/small/p107686.mp3"
+	    }).jPlayer("play",180);
+
+	    // When End change Song
+		$jp.bind($.jPlayer.event.ended, function(event) { // Add a listener to report the time play began
+		  $jp.jPlayer("setMedia", { // Set the media
+		      mp3: "http://mr5.douban.com/201306190323/ac8a73a5eaf7c69a42440e6ec15df6d6/view/song/small/p1000411.mp3"
+		    }).jPlayer("play");
+		});
+		</script>
+
+		<div id="jp_container" class="jp-audio">
+			<div class="jp-type-playlist">
+				<div class="jp-gui jp-interface">
+					<ul class="jp-controls">
+						<li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li>
+						<li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
+						<li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
+						<li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li>
+						<li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>
+						<li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
+						<li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
+						<li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
+					</ul>
+					<div class="jp-progress">
+						<div class="jp-seek-bar">
+							<div class="jp-play-bar"></div>
+						</div>
+					</div>
+					<div class="jp-volume-bar">
+						<div class="jp-volume-bar-value"></div>
+					</div>
+					<div class="jp-time-holder">
+						<div class="jp-current-time"></div>
+						<div class="jp-duration"></div>
+					</div>
+					<ul class="jp-toggles">
+						<li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
+						<li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
+						<li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
+						<li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
+					</ul>
+				</div>
+				<div class="jp-playlist">
+					<ul>
+						<li></li>
+					</ul>
+				</div>
+				<div class="jp-no-solution">
+					<span>Update Required</span>
+					To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
+				</div>
+			</div>
+		</div>
+		<div id="play"></div>
+
+			<script>
+
+	function login(){		
+		$.ajax({
+			url:"http://localhost:3000/login",
+			type:"POST",
+			dataType:"json",
+			data:{
+				app_name:"radio_desktop_win",
+				version:100,
+				email:"cyrilwp@gmail.com",
+				password:"houshuai1"
+			},
+			success:function(data){
+				alert(data)
+			},
+			error:function(){
+				alert("Failed")
+			}
+		})
+	};
+	var songs;
+	function playlist(){		
+		$.ajax({
+			url:"http://localhost:3000/playlist",
+			type:"GET",
+			dataType:"json",
+			data:{
+				app_name:"radio_desktop_win",
+				version:100,
+				channel:0,
+				type:"n"
+			},
+			success:function(data){
+				songs=data.song;
+				// songs.forEach(function(son,index){
+				// 	$("#play").append($("<div class='song'></div>"));
+				// 	$(".song").eq(-1).append("<div class='title'>"+son.title+"</div>");
+				// 	$(".song").eq(-1).append("<div class='album'>"+son.album+"</div>");
+				// 	$(".song").eq(-1).append("<div class='artist'>"+son.artist+"</div>");
+				// 	$(".song").eq(-1).append("<div class='url'><audio controls><source src="+son.url+" type='audio/mpeg'>Your browser does not support the audio element.</audio></div>");
+				// });
+			},
+			error:function(){
+				alert("Failed")
+			}
+		}).done(function(){
+			songs.forEach(function(song,index){
+				songs[index].mp3=song.url;
+				songs[index].poster=song.picture;
+			});
+			console.log(songs);
+
+		// new jPlayerPlaylist({
+		// 	jPlayer: "#jplayer",
+		// 	cssSelectorAncestor: "#jp_container"
+		// }, songs, {
+		// 	swfPath: "/javascripts",
+		// 	supplied: "mp3",
+		// 	wmode: "window",
+		// 	smoothPlayBar: true,
+		// 	keyEnabled: true
+		// });
+
+
+
+		})
+	}
+	playlist();
+
+	</script>
+</body>
+</html>
