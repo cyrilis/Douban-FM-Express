@@ -3,58 +3,134 @@
 <head>
 	<meta charset="UTF-8">
 	<title>DoubanFm</title>
-	<link href="/skin/blue.monday/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+	<style>
+		#poster{
+			width: 225px;
+			height: 225px;
+			display: block;
+			float: left;
+			margin-right: 10px;
+		}
+		button{
+			display: inline-block;
+			height: 30px;
+			width: 80px;
+			background: #ddd;
+			border: 1px solid #ccc;
+		}
+		button:hover{
+			background: #ccc;
+		}
+		#title{
+			padding-top: 20px;
+		}
+	</style>
 	<script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 	<script type="text/javascript" src="/javascripts//jquery.jplayer.min.js"></script>
 	<script type="text/javascript" src="/javascripts/jplayer.playlist.min.js"></script>
-	<script type="text/javascript">
-	//<![CDATA[
-	$(document).ready(function(){
-
-
-	});
-	//]]>
-	</script>
+	<script type="text/javascript" src="/javascripts/storage.min.js"></script>
 </head>
 <body>
+	<iframe  frameborder="0" id="iframe" style="display: none;"></iframe>
+	<img id="poster" src="" alt="">
+	<h2 id="title">Waiting...</h2>
+	<h3 id="artist">To the Response</h3>
+	<h4 id="album">From Server</h4>
+	<button id="pause">PAUSE</button>
+	<button id="next">NEXT</button>
+	<button id="trash">TRASH</button>
+	<button id="fave">FAVE</button>
+	<h2 id="user_name">未登录</h2>
+	<div id="loginform">
+		<input type="email" id="email" placeholder="Email:">
+		<input type="password" id="password" placeholder="Password">
+		<button id='login'>LOGIN</button>
+	</div>
+	<script>
+		// init
+		var i=0,
+		songs
+		,local=localStorage
+		,channel=0
+		,user={islogin:false}
+		,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
 
-
-<div id="jplayer" class="jp-jplayer"></div>
-
-		<iframe  frameborder="0" id="iframe">
-			
-		</iframe>
-		<button id="next">NEXT</button>
-		<script>
-		var i=0;
-		var songs;
-		var $jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
 		$jp.jPlayer();
-	    // When End change Song
-		$jp.bind($.jPlayer.event.ended, function(event) { // Add a listener to report the time play began
-			i++;
-		  	$jp.jPlayer("setMedia", { // Set the media
-		        mp3: songs[i].url
-		    }).jPlayer("play");
-		});
 
+		// bind controlls actions
 		$('#next').click(function(){
-			i++;
-			$jp.jPlayer("setMedia",{mp3:songs[i].url}).jPlayer('play');
+			next();
+		})		
+		$('#pause').click(function(){
+			if($(this).hasClass("paused")){
+				$jp.jPlayer("play");
+				$(this).html("PAUSE").toggleClass("paused");
+			}else{
+				$jp.jPlayer('pause');
+				$(this).html("PLAY").toggleClass("paused");
+			}
 		})
-		function playlist(callback){		
+		$('#trash').click(function(){
+			trash();
+		})
+		// Bind 
+		$jp.bind($.jPlayer.event.ended, function(event) {
+			next();
+		});
+		$jp.bind($.jPlayer.event.play, function(event) { 
+		  	$("#poster").attr("src",$jp.find("img").attr("src"));
+		  	$("h2#title").html(songs[i].title);
+		  	$("h3#artist").html(songs[i].artist);
+		  	$("h4#album").html(songs[i].albumtitle);
+		  	if(songs[i].like==1){
+		  		$("#fave").addClass("faved");
+		  	}else{
+		  		$("#fave").removeClass("faved");
+		  	}
+		});
+		$('#login').click(function(){
+			login();
+		})
+		$("#fave").click(function(){
+			if($(this).hasClass("faved")){
+				unfave();
+			}else{
+				fave();
+			}
+		})
+		$("#trash").click(function(){
+			trash();
+		})
+		// controls
+		function next(){
+			i++;
+			if (!!songs[i]){
+				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+			}else{
+				newlist();
+			};
+		}
+
+		// get playlist and callback next;
+		function playlist(callback,sdata){
+			data={
+					app_name:"radio_desktop_win",
+					version:100,
+					channel:channel,
+					type:"n"
+				};
+			data=sdata||data;
 			$.ajax({
 				url:"http://localhost:3000/playlist",
 				type:"GET",
 				dataType:"json",
-				data:{
-					app_name:"radio_desktop_win",
-					version:100,
-					channel:0,
-					type:"n"
-				},
+				data:data,
 				success:function(data){
-					songs=data.song;
+					if(data.r==0){
+						songs=data.song;
+					}else{
+						alert(data.err);
+					}
 				},
 				error:function(){
 					alert("Failed")
@@ -63,135 +139,174 @@
 				i=0;
 				songs.forEach(function(song,index){
 					songs[index].mp3=song.url;
-					songs[index].poster=song.picture;
+					songs[index].picture=song.picture.replace(/mpic/, "lpic");
 				});
 				console.log(songs);
 				callback();
 			})
-		}
+		}		
+		// callbacks
+
+		//First Play
 		playlist(first);
+
+
 		function first(){
 			i = 0;
-			$jp.jPlayer("setMedia",{mp3:songs[i].url}).jPlayer('play');
+			$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+		}
+		// Login playlist
+		function fave(){
+			data={
+				app_name:"radio_desktop_win",
+				version:100,
+				sid:songs[i].sid,
+				user_id:user.id,
+				expire:user.expire,
+				token:user.token,
+				type:"r",
+			};
+			var faveit=function(){
+				i=0;
+				$("#fave").addClass("faved");
+			}
+			playlist(faveit,data);
+		}
+
+		function unfave(){
+			data={
+				sid:songs[i].sid,
+				user_id:user.id,
+				expire:user.expire,
+				token:user.token,
+				type:"u",
+			};
+			var unfaveit=function(){
+				i=0;
+				$("#fave").removeClass("faved");
+			}
+			playlist(unfaveit,data)
+		}		
+
+		function trash(){
+			data={
+				sid:songs[i].sid,
+				user_id:user.id,
+				expire:user.expire,
+				token:user.token,
+				type:"u",
+			};
+			var trashit=function(){
+				i=0;
+				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+			}
+			playlist(trashit,data)
 		}
 
 
-
-		</script>
-		<div id="jp_container" class="jp-audio">
-			<div class="jp-type-playlist">
-				<div class="jp-gui jp-interface">
-					<ul class="jp-controls">
-						<li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li>
-						<li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
-						<li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
-						<li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li>
-						<li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>
-						<li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
-						<li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
-						<li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
-					</ul>
-					<div class="jp-progress">
-						<div class="jp-seek-bar">
-							<div class="jp-play-bar"></div>
-						</div>
-					</div>
-					<div class="jp-volume-bar">
-						<div class="jp-volume-bar-value"></div>
-					</div>
-					<div class="jp-time-holder">
-						<div class="jp-current-time"></div>
-						<div class="jp-duration"></div>
-					</div>
-					<ul class="jp-toggles">
-						<li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
-						<li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
-						<li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
-						<li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
-					</ul>
-				</div>
-				<div class="jp-playlist">
-					<ul>
-						<li></li>
-					</ul>
-				</div>
-				<div class="jp-no-solution">
-					<span>Update Required</span>
-					To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
-				</div>
-			</div>
-		</div>
-		<div id="play"></div>
-
-			<script>
-
-	function login(){		
-		$.ajax({
-			url:"http://localhost:3000/login",
-			type:"POST",
-			dataType:"json",
-			data:{
-				app_name:"radio_desktop_win",
-				version:100,
-				email:"cyrilwp@gmail.com",
-				password:"houshuai1"
-			},
-			success:function(data){
-				alert(data)
-			},
-			error:function(){
-				alert("Failed")
+		function newlist(){
+			var history=[];
+			type="e";
+			songs.forEach(function(song,index){
+				history.push(song.id+":"+type);
+			})
+			history="|"+history.join("|");
+			data={
+				user_id:user.id,
+				expire:user.expire,
+				token:user.token,
+				channel:channel,
+				type:"p",
+				h:history
+			};
+			var getmore=function(){
+				i=0;
+				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
 			}
-		})
-	};
-	// var songs;
-	// function playlist(){		
-	// 	$.ajax({
-	// 		url:"http://localhost:3000/playlist",
-	// 		type:"GET",
-	// 		dataType:"json",
-	// 		data:{
-	// 			app_name:"radio_desktop_win",
-	// 			version:100,
-	// 			channel:0,
-	// 			type:"n"
-	// 		},
-	// 		success:function(data){
-	// 			songs=data.song;
-	// 			// songs.forEach(function(son,index){
-	// 			// 	$("#play").append($("<div class='song'></div>"));
-	// 			// 	$(".song").eq(-1).append("<div class='title'>"+son.title+"</div>");
-	// 			// 	$(".song").eq(-1).append("<div class='album'>"+son.album+"</div>");
-	// 			// 	$(".song").eq(-1).append("<div class='artist'>"+son.artist+"</div>");
-	// 			// 	$(".song").eq(-1).append("<div class='url'><audio controls><source src="+son.url+" type='audio/mpeg'>Your browser does not support the audio element.</audio></div>");
-	// 			// });
-	// 		},
-	// 		error:function(){
-	// 			alert("Failed")
-	// 		}
-	// 	}).done(function(){
-	// 		songs.forEach(function(song,index){
-	// 			songs[index].mp3=song.url;
-	// 			songs[index].poster=song.picture;
-	// 		});
-	// 		console.log(songs);
-
-	// 	// new jPlayerPlaylist({
-	// 	// 	jPlayer: "#jplayer",
-	// 	// 	cssSelectorAncestor: "#jp_container"
-	// 	// }, songs, {
-	// 	// 	swfPath: "/javascripts",
-	// 	// 	supplied: "mp3",
-	// 	// 	wmode: "window",
-	// 	// 	smoothPlayBar: true,
-	// 	// 	keyEnabled: true
-	// 	// });
+			playlist(getmore,data)
+		}
 
 
+		// login function
+		function login(){		
+		var email=$('#email').val()
+		,password=$('#password').val();
+			$.ajax({
+				url:"http://localhost:3000/login",
+				type:"POST",
+				dataType:"json",
+				data:{
+					app_name:"radio_desktop_win",
+					version:100,
+					email:email,
+					password:password
+				},
+				success:function(data){
+					if(data.r==0){
+						user={
+							islogin:true,
+							id:data.user_id,
+							token:data.token,
+							expire:data.expire,
+							name:data.user_name,
+							email:data.email
+						};
+						$('#user_name').html(user.name);
+						$("#loginform").hide();
+					}else{
+						alert(data.err)
+					}
+				},
+				error:function(){
+					alert("Login Failed!")
+				}
+			})
+		};
+		// var songs;
+		// function playlist(){		
+		// 	$.ajax({
+		// 		url:"http://localhost:3000/playlist",
+		// 		type:"GET",
+		// 		dataType:"json",
+		// 		data:{
+		// 			app_name:"radio_desktop_win",
+		// 			version:100,
+		// 			channel:0,
+		// 			type:"n"
+		// 		},
+		// 		success:function(data){
+		// 			songs=data.song;
+		// 			// songs.forEach(function(son,index){
+		// 			// 	$("#play").append($("<div class='song'></div>"));
+		// 			// 	$(".song").eq(-1).append("<div class='title'>"+son.title+"</div>");
+		// 			// 	$(".song").eq(-1).append("<div class='album'>"+son.album+"</div>");
+		// 			// 	$(".song").eq(-1).append("<div class='artist'>"+son.artist+"</div>");
+		// 			// 	$(".song").eq(-1).append("<div class='url'><audio controls><source src="+son.url+" type='audio/mpeg'>Your browser does not support the audio element.</audio></div>");
+		// 			// });
+		// 		},
+		// 		error:function(){
+		// 			alert("Failed")
+		// 		}
+		// 	}).done(function(){
+		// 		songs.forEach(function(song,index){
+		// 			songs[index].mp3=song.url;
+		// 			songs[index].poster=song.picture;
+		// 		});
+		// 		console.log(songs);
 
-	// 	})
-	// }
-	// playlist();
+		// 	// new jPlayerPlaylist({
+		// 	// 	jPlayer: "#jplayer",
+		// 	// 	cssSelectorAncestor: "#jp_container"
+		// 	// }, songs, {
+		// 	// 	swfPath: "/javascripts",
+		// 	// 	supplied: "mp3",
+		// 	// 	wmode: "window",
+		// 	// 	smoothPlayBar: true,
+		// 	// 	keyEnabled: true
+		// 	// });
+		// 	})
+		// }
+		// playlist();
 
 	</script>
 </body>
