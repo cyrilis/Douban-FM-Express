@@ -24,20 +24,60 @@
 		<iframe  frameborder="0" id="iframe">
 			
 		</iframe>
+		<button id="next">NEXT</button>
 		<script>
+		var i=0;
+		var songs;
 		var $jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
-		$jp.jPlayer().jPlayer("setMedia", { // Set the media
-	      mp3: "http://mr3.douban.com/201306190252/9bc37e8298f772a84df59083a1f32dde/view/song/small/p107686.mp3"
-	    }).jPlayer("play",180);
-
+		$jp.jPlayer();
 	    // When End change Song
 		$jp.bind($.jPlayer.event.ended, function(event) { // Add a listener to report the time play began
-		  $jp.jPlayer("setMedia", { // Set the media
-		      mp3: "http://mr5.douban.com/201306190323/ac8a73a5eaf7c69a42440e6ec15df6d6/view/song/small/p1000411.mp3"
+			i++;
+		  	$jp.jPlayer("setMedia", { // Set the media
+		        mp3: songs[i].url
 		    }).jPlayer("play");
 		});
-		</script>
 
+		$('#next').click(function(){
+			i++;
+			$jp.jPlayer("setMedia",{mp3:songs[i].url}).jPlayer('play');
+		})
+		function playlist(callback){		
+			$.ajax({
+				url:"http://localhost:3000/playlist",
+				type:"GET",
+				dataType:"json",
+				data:{
+					app_name:"radio_desktop_win",
+					version:100,
+					channel:0,
+					type:"n"
+				},
+				success:function(data){
+					songs=data.song;
+				},
+				error:function(){
+					alert("Failed")
+				}
+			}).done(function(){
+				i=0;
+				songs.forEach(function(song,index){
+					songs[index].mp3=song.url;
+					songs[index].poster=song.picture;
+				});
+				console.log(songs);
+				callback();
+			})
+		}
+		playlist(first);
+		function first(){
+			i = 0;
+			$jp.jPlayer("setMedia",{mp3:songs[i].url}).jPlayer('play');
+		}
+
+
+
+		</script>
 		<div id="jp_container" class="jp-audio">
 			<div class="jp-type-playlist">
 				<div class="jp-gui jp-interface">
@@ -104,54 +144,54 @@
 			}
 		})
 	};
-	var songs;
-	function playlist(){		
-		$.ajax({
-			url:"http://localhost:3000/playlist",
-			type:"GET",
-			dataType:"json",
-			data:{
-				app_name:"radio_desktop_win",
-				version:100,
-				channel:0,
-				type:"n"
-			},
-			success:function(data){
-				songs=data.song;
-				// songs.forEach(function(son,index){
-				// 	$("#play").append($("<div class='song'></div>"));
-				// 	$(".song").eq(-1).append("<div class='title'>"+son.title+"</div>");
-				// 	$(".song").eq(-1).append("<div class='album'>"+son.album+"</div>");
-				// 	$(".song").eq(-1).append("<div class='artist'>"+son.artist+"</div>");
-				// 	$(".song").eq(-1).append("<div class='url'><audio controls><source src="+son.url+" type='audio/mpeg'>Your browser does not support the audio element.</audio></div>");
-				// });
-			},
-			error:function(){
-				alert("Failed")
-			}
-		}).done(function(){
-			songs.forEach(function(song,index){
-				songs[index].mp3=song.url;
-				songs[index].poster=song.picture;
-			});
-			console.log(songs);
+	// var songs;
+	// function playlist(){		
+	// 	$.ajax({
+	// 		url:"http://localhost:3000/playlist",
+	// 		type:"GET",
+	// 		dataType:"json",
+	// 		data:{
+	// 			app_name:"radio_desktop_win",
+	// 			version:100,
+	// 			channel:0,
+	// 			type:"n"
+	// 		},
+	// 		success:function(data){
+	// 			songs=data.song;
+	// 			// songs.forEach(function(son,index){
+	// 			// 	$("#play").append($("<div class='song'></div>"));
+	// 			// 	$(".song").eq(-1).append("<div class='title'>"+son.title+"</div>");
+	// 			// 	$(".song").eq(-1).append("<div class='album'>"+son.album+"</div>");
+	// 			// 	$(".song").eq(-1).append("<div class='artist'>"+son.artist+"</div>");
+	// 			// 	$(".song").eq(-1).append("<div class='url'><audio controls><source src="+son.url+" type='audio/mpeg'>Your browser does not support the audio element.</audio></div>");
+	// 			// });
+	// 		},
+	// 		error:function(){
+	// 			alert("Failed")
+	// 		}
+	// 	}).done(function(){
+	// 		songs.forEach(function(song,index){
+	// 			songs[index].mp3=song.url;
+	// 			songs[index].poster=song.picture;
+	// 		});
+	// 		console.log(songs);
 
-		// new jPlayerPlaylist({
-		// 	jPlayer: "#jplayer",
-		// 	cssSelectorAncestor: "#jp_container"
-		// }, songs, {
-		// 	swfPath: "/javascripts",
-		// 	supplied: "mp3",
-		// 	wmode: "window",
-		// 	smoothPlayBar: true,
-		// 	keyEnabled: true
-		// });
+	// 	// new jPlayerPlaylist({
+	// 	// 	jPlayer: "#jplayer",
+	// 	// 	cssSelectorAncestor: "#jp_container"
+	// 	// }, songs, {
+	// 	// 	swfPath: "/javascripts",
+	// 	// 	supplied: "mp3",
+	// 	// 	wmode: "window",
+	// 	// 	smoothPlayBar: true,
+	// 	// 	keyEnabled: true
+	// 	// });
 
 
 
-		})
-	}
-	playlist();
+	// 	})
+	// }
+	// playlist();
 
 	</script>
 </body>
