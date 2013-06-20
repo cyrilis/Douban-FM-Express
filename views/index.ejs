@@ -63,7 +63,7 @@
 		,channel=0
 		,user={islogin:false}
 		,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
-
+		var getp=false;
 		$jp.jPlayer();
 		local.getItem("token");
 		local.getItem('expire');
@@ -72,9 +72,9 @@
 				user[item]=local.getItem(item);
 			})
 		};
-		var pdata;
+		var fdata;
 		function initpdata(){
-			pdata={
+			fdata={
 				app_name:"radio_desktop_win",
 				version:100,
 				//sid:songs[i].sid,
@@ -83,10 +83,11 @@
 				token:user.token,
 				channel:channel,
 				type:"n",
-				from:"mainsite"
+				from:"mainsite",
+				r:Math.floor(Math.random()*10E7)
 			}
 			if(!!songs){
-				pdata.sid=songs[i].sid;
+				fdata.sid=songs[i].sid;
 			}
 		}
 
@@ -122,7 +123,8 @@
 		  		$("#fave").addClass("faved");
 		  	}else{
 		  		$("#fave").removeClass("faved");
-		  	}
+		  	};
+		  	getsonginfo();
 		});
 		$('#login').click(function(){
 			login(true);
@@ -147,8 +149,25 @@
 			};
 		}
 
+
+		function getsonginfo(){
+			$.ajax({
+				url:'http://localhost:3000/songinfo?song_id='+songs[i].sid,
+				type:'GET',
+				dataType:"json",
+				success:function(data){
+					if(data.artist_name){
+						alert(data.artist_name);
+					}
+				},
+				error:function(){
+					alert('get songinfo error')
+				}
+			})
+		}
 		// get playlist and callback next;
 		function playlist(callback,sdata){
+			console.log("Geting Playlist.....");
 			data={
 					app_name:"radio_desktop_win",
 					version:100,
@@ -170,20 +189,23 @@
 					}
 				},
 				error:function(){
-					gotplaylist=false;
+					gotp=false;
 					alert("Get Playlist Failed")
 				}
 			}).done(function(){
 				if(!!gotp){
 					i=0;
+					initpdata();
 					songs.forEach(function(song,index){
 						songs[index].mp3=song.url;
 						songs[index].picture=song.picture.replace(/mpic/, "lpic");
+						console.log(song.title+"--"+song.artist);
 					});
-					console.log(songs);
+					
 					callback();
 				}else{
-					login(false,openlogin);
+					console.log('what the fuck!')
+					//login(false,openlogin);
 				}
 			})
 		}		
@@ -192,7 +214,7 @@
 		function openlogin(){
 			i=0;
 			if (user.islogin) {
-				playlist(first,pdata);
+				playlist(first,fdata);
 			}else{
 				playlist(first);
 			};
@@ -214,22 +236,23 @@
 		// 	playlist(first);
 		// };
 
-
 		function first(){
 			i = 0;
 			$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
 		}
 		// Login playlist
 		function fave(){
+			var pdata=fdata;
 			pdata.type="r";
+			pdata.sid=songs[i].sid;
 			var faveit=function(){
-				i=0;
 				$("#fave").addClass("faved");
 			}
 			playlist(faveit,pdata);
 		}
 
 		function unfave(){
+			var pdata=fdata;
 			pdata.type="u"
 			var unfaveit=function(){
 				i=0;
@@ -239,6 +262,7 @@
 		}		
 
 		function trash(){
+			var pdata=fdata;
 			pdata.type="b";
 			var trashit=function(){
 				i=0;
@@ -248,11 +272,13 @@
 		}
 
 		function marked(){
+			var pdata=fdata;
 			pdata.type="e";
 			function markit(){}
 			playlist(markit,pdata);
 		}
 		function newlist(){
+			var pdata=fdata;
 			var history=[];
 			type="e";
 			songs.forEach(function(song,index){
@@ -270,6 +296,7 @@
 
 		// login function
 		function login(really,callback){	
+			console.log("Logining in...")
 			if (really) {
 				var email=$('#email').val()
 				,password=$('#password').val();
@@ -303,7 +330,7 @@
 							email:sdata.email,
 							password:logindata.password
 						};
-						console.log(user);
+						console.log(user.islogin,user.name);
 						user_items.forEach(function(item,index){
 							local.setItem(item,user[item]);
 						})

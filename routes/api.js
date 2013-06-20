@@ -57,6 +57,7 @@ exports.playlist = function(req, res){
         , token = requrl.token 
         , sid = requrl.sid 
         , h = requrl.h 
+        , r = requrl.r
         , from = requrl.from
         , channel = requrl.channel 
         , type = requrl.type 
@@ -91,6 +92,48 @@ exports.playlist = function(req, res){
         host: 'www.douban.com', 
         port: 80, 
         path: '/j/app/radio/people?'+data, 
+        method: 'GET', 
+        headers: { 
+            'Content-Type': 'application/x-www-form-urlencoded', 
+            'Content-Length': data.length 
+        } 
+    }; 
+    res.setHeader('Access-Control-Allow-Origin' , '*'); 
+    res.setHeader('Access-Control-Allow-Headers' , 'X-Requested-With'); 
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    var result;
+    var http=require("http"); 
+    var proxy = http.request(options, function(response) { 
+        response.setEncoding('utf8'); 
+        response.on('data', function (chunk) {
+            console.log(chunk);
+            result=chunk;
+            // res.end(chunk);
+            // res.end(result)
+            res.write(chunk);
+        }); 
+        response.on('end', function (chunk){
+            console.log(chunk);
+            res.end();
+            console.log("send!");
+        })
+    }); 
+    proxy.write(data); 
+    proxy.end(); 
+}
+exports.songinfo = function(req, res){ 
+    var url = require("url"); 
+    requrl = url.parse(req.url, true).query; 
+    var song_id = requrl.song_id
+        , querystring = require('querystring') 
+        , host = "music.douban.com"; 
+    var data=querystring.stringify({ 
+        song_id:song_id
+    }); 
+    var options = { 
+        host: host, 
+        port: 80, 
+        path: '/api/song/info?'+data, 
         method: 'GET', 
         headers: { 
             'Content-Type': 'application/x-www-form-urlencoded', 
