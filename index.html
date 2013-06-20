@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DoubanFm</title>
+	<style>
+		#poster{
+			width: 225px;
+			height: 225px;
+			display: block;
+			float: left;
+			margin-right: 10px;
+		}
+		.faved{
+			background: red;
+		}
+		button{
+			display: inline-block;
+			height: 30px;
+			width: 80px;
+			background: #ddd;
+			border: 1px solid #ccc;
+		}
+		h1,h2,h3,h4,h5,h6{
+			font-weight: normal;
+			margin: 10px 0;
+		}
+		button:hover{
+			background: #ccc;
+		}
+		#title{
+			padding-bottom: 10px;
+		}
+	</style>
+	<script type="text/javascript" src="./javascripts/jquery.min.js"></script>
+	<script type="text/javascript" src="./javascripts//jquery.jplayer.min.js"></script>
+	<script type="text/javascript" src="./javascripts/jplayer.playlist.min.js"></script>
+	<script type="text/javascript" src="./javascripts/storage.min.js"></script>
+</head>
+<body>
+	<iframe  frameborder="0" id="iframe" style="display: none;"></iframe>
+	<img id="poster" src="" alt="">
+	<h2 id="title">Waiting...</h2>
+	<h3 id="artist">To the Response</h3>
+	<h4 id="album">From Server</h4>
+	<button id="pause">PAUSE</button>
+	<button id="next">NEXT</button>
+	<button id="trash">TRASH</button>
+	<button id="fave">FAVE</button>
+	<h2 id="user_name">未登录</h2>
+	<div id="loginform">
+		<input type="email" id="email" placeholder="Email:">
+		<input type="password" id="password" placeholder="Password">
+		<button id='login'>LOGIN</button>
+	</div>
+	<script>
+		// init
+		var i=0,
+		songs
+		,local=localStorage
+		,logindata
+		,user_items=["email","islogin","user_name",'user_id','expire','token','password']
+		,channel=0
+		,user={islogin:false}
+		,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
+		var getp=false;
+		$jp.jPlayer({swfPath: "./javascripts"});
+		local.getItem("token");
+		local.getItem('expire');
+		if(local.getItem("islogin")=='true'){
+			user_items.forEach(function(item,index){
+				user[item]=local.getItem(item);
+			})
+		};
+		var fdata;
+		function initpdata(){
+			fdata={
+				app_name:"radio_desktop_win",
+				version:100,
+				//sid:songs[i].sid,
+				user_id:user.user_id,
+				expire:user.expire,
+				token:user.token,
+				channel:channel,
+				type:"n",
+				from:"mainsite",
+				r:Math.floor(Math.random()*10E7)
+			}
+			if(!!songs){
+				fdata.sid=songs[i].sid;
+			}
+		}
+
+		initpdata();
+
+		// bind controlls actions
+		$('#next').click(function(){
+			next();
+		})		
+		$('#pause').click(function(){
+			if($(this).hasClass("paused")){
+				$jp.jPlayer("play");
+				$(this).html("PAUSE").toggleClass("paused");
+			}else{
+				$jp.jPlayer('pause');
+				$(this).html("PLAY").toggleClass("paused");
+			}
+		})
+		$('#trash').click(function(){
+			trash();
+		})
+		// Bind 
+		$jp.bind($.jPlayer.event.ended, function(event) {
+			marked();
+			next();
+		});
+		$jp.bind($.jPlayer.event.play, function(event) { 
+		  	$("#poster").attr("src",$jp.find("img").attr("src"));
+		  	$("h2#title").html(songs[i].title);
+		  	$("h3#artist").html(songs[i].artist);
+		  	$("h4#album").html(songs[i].albumtitle);
+		  	if(songs[i].like==1){
+		  		$("#fave").addClass("faved");
+		  	}else{
+		  		$("#fave").removeClass("faved");
+		  	};
+		  	//getsonginfo();
+		});
+		$('#login').click(function(){
+			login(true);
+		})
+		$("#fave").click(function(){
+			if($(this).hasClass("faved")){
+				unfave();
+			}else{
+				fave();
+			}
+		})
+		$("#trash").click(function(){
+			trash();
+		})
+		// controls
+		function next(){
+			i++;
+			if (!!songs[i]){
+				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+			}else{
+				newlist();
+			};
+		}
+
+
+		function getsonginfo(){
+			$.ajax({
+				url:'http://localhost:3000/songinfo?song_id='+songs[i].sid,
+				type:'GET',
+				dataType:"json",
+				success:function(data){
+					if(data.artist_name){
+						alert(data.artist_name);
+					}
+				},
+				error:function(){
+					alert('get songinfo error')
+				}
+			})
+		}
+		// get playlist and callback next;
+		function playlist(callback,sdata){
+			console.log("Geting Playlist.....");
+			data={
+					app_name:"radio_desktop_win",
+					version:100,
+					channel:channel,
+					type:"n"
+				};
+			data=sdata||data;
+			$.ajax({
+				url:"http://www.douban.com/j/app/radio/people",
+				type:"GET",
+				dataType:"json",
+				data:data,
+				success:function(data){
+					if(data.r==0){
+						gotp=true;
+						songs=data.song;
+					}else{
+						gotp=false;
+					}
+				},
+				error:function(){
+					gotp=false;
+					alert("Get Playlist Failed")
+				}
+			}).done(function(){
+				if(!!gotp){
+					i=0;
+					initpdata();
+					songs.forEach(function(song,index){
+						songs[index].mp3=song.url;
+						songs[index].picture=song.picture.replace(/mpic/, "lpic");
+						console.log(song.title+"--"+song.artist);
+					});
+					
+					callback();
+				}else{
+					console.log('what the fuck!')
+					//login(false,openlogin);
+				}
+			})
+		}		
+		// callbacks
+		login(false,openlogin)
+		function openlogin(){
+			i=0;
+			if (user.islogin) {
+				playlist(first,fdata);
+			}else{
+				playlist(first);
+			};
+		}
+		//First Play
+		// if (user.islogin) {
+		// 	data={
+		// 		app_name:"radio_desktop_win",
+		// 		version:100,
+		// 		// sid:songs[i].sid,
+		// 		user_id:user.id,
+		// 		expire:user.expire,
+		// 		token:user.token,
+		// 		channel:channel,
+		// 		type:"n",
+		// 	}
+		// 	playlist(first,data);
+		// }else{
+		// 	playlist(first);
+		// };
+
+		function first(){
+			i = 0;
+			$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+		}
+		// Login playlist
+		function fave(){
+			var pdata=fdata;
+			pdata.type="r";
+			pdata.sid=songs[i].sid;
+			var faveit=function(){
+				$("#fave").addClass("faved");
+			}
+			playlist(faveit,pdata);
+		}
+
+		function unfave(){
+			var pdata=fdata;
+			pdata.type="u"
+			var unfaveit=function(){
+				i=0;
+				$("#fave").removeClass("faved");
+			}
+			playlist(unfaveit,pdata)
+		}		
+
+		function trash(){
+			var pdata=fdata;
+			pdata.type="b";
+			var trashit=function(){
+				i=0;
+				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+			}
+			playlist(trashit,pdata)
+		}
+
+		function marked(){
+			var pdata=fdata;
+			pdata.type="e";
+			function markit(){}
+			playlist(markit,pdata);
+		}
+		function newlist(){
+			var pdata=fdata;
+			var history=[];
+			type="e";
+			songs.forEach(function(song,index){
+				history.push(song.sid+":"+type);
+			})
+			history=history.join("|");
+			pdata.type="p";
+			pdata.h=history;
+			var getmore=function(){
+				i=0;
+				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
+			}
+			playlist(getmore,data)
+		}
+
+		// login function
+		function login(really,callback){	
+			console.log("Logining in...")
+			if (really) {
+				var email=$('#email').val()
+				,password=$('#password').val();
+				logindata={
+					app_name:"radio_desktop_win",
+					version:100,
+					email:email,
+					password:password
+				}
+			}else{
+				logindata={
+					app_name:"radio_desktop_win",
+					version:100,
+					email:user.email,
+					password:user.password
+				}
+			};
+			$.ajax({
+				url:"http://www.douban.com/j/app/login",
+				type:"POST",
+				dataType:"json",
+				data:logindata,
+				success:function(sdata){
+					if(sdata.r==0){
+						user={
+							islogin:true,
+							user_id:sdata.user_id,
+							token:sdata.token,
+							expire:sdata.expire,
+							user_name:sdata.user_name,
+							email:sdata.email,
+							password:logindata.password
+						};
+						console.log(user.islogin,user.name);
+						user_items.forEach(function(item,index){
+							local.setItem(item,user[item]);
+						})
+						local.password=user.password;
+						$('#user_name').html(user.user_name);
+						$("#loginform").hide();
+					}else{
+						console.error(sdata.err)
+					}
+				},
+				error:function(){
+					alert("Login Failed!")
+				}
+			}).done(function(){
+				initpdata();
+				if(!!callback){
+					callback();
+				}
+			})
+		};
+		// var songs;
+		// function playlist(){		
+		// 	$.ajax({
+		// 		url:"http://localhost:3000/playlist",
+		// 		type:"GET",
+		// 		dataType:"json",
+		// 		data:{
+		// 			app_name:"radio_desktop_win",
+		// 			version:100,
+		// 			channel:0,
+		// 			type:"n"
+		// 		},
+		// 		success:function(data){
+		// 			songs=data.song;
+		// 			// songs.forEach(function(son,index){
+		// 			// 	$("#play").append($("<div class='song'></div>"));
+		// 			// 	$(".song").eq(-1).append("<div class='title'>"+son.title+"</div>");
+		// 			// 	$(".song").eq(-1).append("<div class='album'>"+son.album+"</div>");
+		// 			// 	$(".song").eq(-1).append("<div class='artist'>"+son.artist+"</div>");
+		// 			// 	$(".song").eq(-1).append("<div class='url'><audio controls><source src="+son.url+" type='audio/mpeg'>Your browser does not support the audio element.</audio></div>");
+		// 			// });
+		// 		},
+		// 		error:function(){
+		// 			alert("Failed")
+		// 		}
+		// 	}).done(function(){
+		// 		songs.forEach(function(song,index){
+		// 			songs[index].mp3=song.url;
+		// 			songs[index].poster=song.picture;
+		// 		});
+		// 		console.log(songs);
+
+		// 	// new jPlayerPlaylist({
+		// 	// 	jPlayer: "#jplayer",
+		// 	// 	cssSelectorAncestor: "#jp_container"
+		// 	// }, songs, {
+		// 	// 	swfPath: "/javascripts",
+		// 	// 	supplied: "mp3",
+		// 	// 	wmode: "window",
+		// 	// 	smoothPlayBar: true,
+		// 	// 	keyEnabled: true
+		// 	// });
+		// 	})
+		// }
+		// playlist();
+
+	</script>
+</body>
+</html>
