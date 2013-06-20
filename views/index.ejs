@@ -11,6 +11,9 @@
 			float: left;
 			margin-right: 10px;
 		}
+		.faved{
+			background: red;
+		}
 		button{
 			display: inline-block;
 			height: 30px;
@@ -18,11 +21,15 @@
 			background: #ddd;
 			border: 1px solid #ccc;
 		}
+		h1,h2,h3,h4,h5,h6{
+			font-weight: normal;
+			margin: 10px 0;
+		}
 		button:hover{
 			background: #ccc;
 		}
 		#title{
-			padding-top: 20px;
+			padding-bottom: 10px;
 		}
 	</style>
 	<script type="text/javascript" src="/javascripts/jquery.min.js"></script>
@@ -51,11 +58,39 @@
 		var i=0,
 		songs
 		,local=localStorage
+		,logindata
+		,user_items=["email","islogin","user_name",'user_id','expire','token','password']
 		,channel=0
 		,user={islogin:false}
 		,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
 
 		$jp.jPlayer();
+		local.getItem("token");
+		local.getItem('expire');
+		if(local.getItem("islogin")=='true'){
+			user_items.forEach(function(item,index){
+				user[item]=local.getItem(item);
+			})
+		};
+		var pdata;
+		function initpdata(){
+			pdata={
+				app_name:"radio_desktop_win",
+				version:100,
+				//sid:songs[i].sid,
+				user_id:user.user_id,
+				expire:user.expire,
+				token:user.token,
+				channel:channel,
+				type:"n",
+				from:"mainsite"
+			}
+			if(!!songs){
+				pdata.sid=songs[i].sid;
+			}
+		}
+
+		initpdata();
 
 		// bind controlls actions
 		$('#next').click(function(){
@@ -75,6 +110,7 @@
 		})
 		// Bind 
 		$jp.bind($.jPlayer.event.ended, function(event) {
+			marked();
 			next();
 		});
 		$jp.bind($.jPlayer.event.play, function(event) { 
@@ -89,7 +125,7 @@
 		  	}
 		});
 		$('#login').click(function(){
-			login();
+			login(true);
 		})
 		$("#fave").click(function(){
 			if($(this).hasClass("faved")){
@@ -127,28 +163,56 @@
 				data:data,
 				success:function(data){
 					if(data.r==0){
+						gotp=true;
 						songs=data.song;
 					}else{
-						alert(data.err);
+						gotp=false;
 					}
 				},
 				error:function(){
-					alert("Failed")
+					gotplaylist=false;
+					alert("Get Playlist Failed")
 				}
 			}).done(function(){
-				i=0;
-				songs.forEach(function(song,index){
-					songs[index].mp3=song.url;
-					songs[index].picture=song.picture.replace(/mpic/, "lpic");
-				});
-				console.log(songs);
-				callback();
+				if(!!gotp){
+					i=0;
+					songs.forEach(function(song,index){
+						songs[index].mp3=song.url;
+						songs[index].picture=song.picture.replace(/mpic/, "lpic");
+					});
+					console.log(songs);
+					callback();
+				}else{
+					login(false,openlogin);
+				}
 			})
 		}		
 		// callbacks
-
+		login(false,openlogin)
+		function openlogin(){
+			i=0;
+			if (user.islogin) {
+				playlist(first,pdata);
+			}else{
+				playlist(first);
+			};
+		}
 		//First Play
-		playlist(first);
+		// if (user.islogin) {
+		// 	data={
+		// 		app_name:"radio_desktop_win",
+		// 		version:100,
+		// 		// sid:songs[i].sid,
+		// 		user_id:user.id,
+		// 		expire:user.expire,
+		// 		token:user.token,
+		// 		channel:channel,
+		// 		type:"n",
+		// 	}
+		// 	playlist(first,data);
+		// }else{
+		// 	playlist(first);
+		// };
 
 
 		function first(){
@@ -157,68 +221,46 @@
 		}
 		// Login playlist
 		function fave(){
-			data={
-				app_name:"radio_desktop_win",
-				version:100,
-				sid:songs[i].sid,
-				user_id:user.id,
-				expire:user.expire,
-				token:user.token,
-				type:"r",
-			};
+			pdata.type="r";
 			var faveit=function(){
 				i=0;
 				$("#fave").addClass("faved");
 			}
-			playlist(faveit,data);
+			playlist(faveit,pdata);
 		}
 
 		function unfave(){
-			data={
-				sid:songs[i].sid,
-				user_id:user.id,
-				expire:user.expire,
-				token:user.token,
-				type:"u",
-			};
+			pdata.type="u"
 			var unfaveit=function(){
 				i=0;
 				$("#fave").removeClass("faved");
 			}
-			playlist(unfaveit,data)
+			playlist(unfaveit,pdata)
 		}		
 
 		function trash(){
-			data={
-				sid:songs[i].sid,
-				user_id:user.id,
-				expire:user.expire,
-				token:user.token,
-				type:"u",
-			};
+			pdata.type="b";
 			var trashit=function(){
 				i=0;
 				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
 			}
-			playlist(trashit,data)
+			playlist(trashit,pdata)
 		}
 
-
+		function marked(){
+			pdata.type="e";
+			function markit(){}
+			playlist(markit,pdata);
+		}
 		function newlist(){
 			var history=[];
 			type="e";
 			songs.forEach(function(song,index){
-				history.push(song.id+":"+type);
+				history.push(song.sid+":"+type);
 			})
-			history="|"+history.join("|");
-			data={
-				user_id:user.id,
-				expire:user.expire,
-				token:user.token,
-				channel:channel,
-				type:"p",
-				h:history
-			};
+			history=history.join("|");
+			pdata.type="p";
+			pdata.h=history;
 			var getmore=function(){
 				i=0;
 				$jp.jPlayer("setMedia",{mp3:songs[i].url,poster:songs[i].picture}).jPlayer('play');
@@ -226,39 +268,59 @@
 			playlist(getmore,data)
 		}
 
-
 		// login function
-		function login(){		
-		var email=$('#email').val()
-		,password=$('#password').val();
-			$.ajax({
-				url:"http://localhost:3000/login",
-				type:"POST",
-				dataType:"json",
-				data:{
+		function login(really,callback){	
+			if (really) {
+				var email=$('#email').val()
+				,password=$('#password').val();
+				logindata={
 					app_name:"radio_desktop_win",
 					version:100,
 					email:email,
 					password:password
-				},
-				success:function(data){
-					if(data.r==0){
+				}
+			}else{
+				logindata={
+					app_name:"radio_desktop_win",
+					version:100,
+					email:user.email,
+					password:user.password
+				}
+			};
+			$.ajax({
+				url:"http://localhost:3000/login",
+				type:"POST",
+				dataType:"json",
+				data:logindata,
+				success:function(sdata){
+					if(sdata.r==0){
 						user={
 							islogin:true,
-							id:data.user_id,
-							token:data.token,
-							expire:data.expire,
-							name:data.user_name,
-							email:data.email
+							user_id:sdata.user_id,
+							token:sdata.token,
+							expire:sdata.expire,
+							user_name:sdata.user_name,
+							email:sdata.email,
+							password:logindata.password
 						};
-						$('#user_name').html(user.name);
+						console.log(user);
+						user_items.forEach(function(item,index){
+							local.setItem(item,user[item]);
+						})
+						local.password=user.password;
+						$('#user_name').html(user.user_name);
 						$("#loginform").hide();
 					}else{
-						alert(data.err)
+						console.error(sdata.err)
 					}
 				},
 				error:function(){
 					alert("Login Failed!")
+				}
+			}).done(function(){
+				initpdata();
+				if(!!callback){
+					callback();
 				}
 			})
 		};

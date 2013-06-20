@@ -53,10 +53,11 @@ exports.playlist = function(req, res){
         , email = requrl.email 
         , password = requrl.password 
         , user_id = requrl.user_id 
-        , expire =  requrl.expires 
+        , expire =  requrl.expire
         , token = requrl.token 
         , sid = requrl.sid 
         , h = requrl.h 
+        , from = requrl.from
         , channel = requrl.channel 
         , type = requrl.type 
         , querystring = require('querystring') 
@@ -112,7 +113,7 @@ exports.playlist = function(req, res){
         }); 
         response.on('end', function (chunk){
             console.log(chunk);
-            res.end("");
+            res.end();
             console.log("send!");
         })
     }); 
