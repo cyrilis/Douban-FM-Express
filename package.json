@@ -31,7 +31,7 @@
   },
   "window": {
     "icon": "fm.ico",
-    "toolbar": false,
+    "toolbar": true,
     "width": 585,
     "height": 290,
     "min_width": 585,
