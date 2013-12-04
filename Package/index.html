@@ -39,6 +39,7 @@
 			margin-top: 0;
 			height: 28px;
 			overflow: hidden;
+
 		}
 		#artist{
 			font-size: 19px;
@@ -56,6 +57,9 @@
 			height: 45px;
 			width: 100%;
 			background: #1f1f1f;
+			position: relative;
+			-webkit-user-select: none;
+			-webkit-app-region: drag;
 		}
 		#right{
 			width: 305px;
@@ -200,6 +204,24 @@
 			padding: 10px;
 			padding-left: 20px;
 		}
+		.close{
+			color: #ccc;
+			width: 45px;
+			height: 45px;
+			position: absolute;
+			top: 0;
+			right: 0;
+			text-align: center;
+			line-height: 40px;
+			font-size: 45px;
+			cursor: pointer
+		}
+		.close:hover{
+			color: #fff;
+			background: #2f2f2f;
+            -webkit-user-select: none;
+            -webkit-app-region: no-drag;
+		}
 	</style>
 	<script type="text/javascript" src="./javascripts/jquery.min.js"></script>
 	<script type="text/javascript" src="./javascripts//jquery.jplayer.min.js"></script>
@@ -209,6 +231,7 @@
 <body>
 	<div id="bar">
 		<h1 id="app">Douban.FM</h1>
+		<div class="close" onclick="window.close();return false;">&times;</div>
 	</div>
 	<iframe  frameborder="0" id="iframe" style="display: none;"></iframe>
 	<img id="poster" src="" alt="">
@@ -385,7 +408,7 @@
 				dataType:"json",
 				data:data,
 				success:function(data){
-					if(data.r==0){
+					if(data.r==0&&data.song){
 						gotp=true;
 						songs=data.song;
 					}else{
@@ -524,7 +547,7 @@
 					email:user.email,
 					password:user.password
 				}
-			};
+			}
 			$.ajax({
 				url:"http://www.douban.com/j/app/login",
 				type:"POST",
@@ -561,7 +584,7 @@
 					callback();
 				}
 			})
-		};
+		}
 		// var songs;
 		// function playlist(){		
 		// 	$.ajax({
