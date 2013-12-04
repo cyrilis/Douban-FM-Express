@@ -55,7 +55,7 @@
 		}
 		#bar{
 			height: 45px;
-			width: 100%;
+			width: 540px;
 			background: #1f1f1f;
 			position: relative;
 			-webkit-user-select: none;
@@ -209,12 +209,13 @@
 			width: 45px;
 			height: 45px;
 			position: absolute;
+            background: #1f1f1f;
 			top: 0;
 			right: 0;
 			text-align: center;
 			line-height: 40px;
 			font-size: 45px;
-			cursor: pointer
+			cursor: pointer;
 		}
 		.close:hover{
 			color: #fff;
@@ -231,8 +232,8 @@
 <body>
 	<div id="bar">
 		<h1 id="app">Douban.FM</h1>
-		<div class="close" onclick="window.close();return false;">&times;</div>
 	</div>
+    <div class="close" onclick="window.close();return false;">&times;</div>
 	<iframe  frameborder="0" id="iframe" style="display: none;"></iframe>
 	<img id="poster" src="" alt="">
 	<div id="right">
