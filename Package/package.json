@@ -35,6 +35,7 @@
     "width": 585,
     "height": 290, //290 325
 	"frame":false,
+    "transparent": true,
     "min_width": 585,
     "min_height": 290,
     "max_width": 585,
