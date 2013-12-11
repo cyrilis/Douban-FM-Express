@@ -7,6 +7,7 @@ Screenshot:
 -----------
 ![](http://img.cyrilis.com/img/douban_radio.png)
 
+Appearance has changed. and will update soon.
 
 Usage:
 -----------
@@ -21,6 +22,8 @@ Usage:
 Note:
 -----------
 Express only works as proxy on debug, now it's not used when nw is running.
+Press F12 to open DevTool
+Have Fun!
 
 -----------
 Thanks:

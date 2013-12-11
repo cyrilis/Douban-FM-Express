@@ -1,0 +1,232 @@
+/**
+ * Created by Cyril on 13-12-11.
+ */
+@font-face {
+  font-family: 'xin';
+  src: url("Xin.otf");
+}
+body {
+  font-family: "xin", "Microsoft Yahei";
+  margin: 0;
+  padding: 0;
+  width: 585px;
+  height: 290px;
+  overflow: hidden;
+  -webkit-user-select: none;
+}
+#poster {
+  width: 250px;
+  height: 250px;
+  display: block;
+  float: left;
+  background: url("../images/cover.png");
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+  margin: 10px 0;
+}
+button:hover {
+  background: #ccc;
+}
+#title {
+  padding-top: 30px;
+  font-size: 25px;
+  line-height: 28px;
+  margin-bottom: 20px;
+  margin-top: 0;
+  height: 28px;
+  overflow: hidden;
+  font-family: "xin", "Microsoft YaHei";
+}
+#artist {
+  font-size: 19px;
+  display: block;
+  height: 24px;
+  overflow: hidden;
+}
+#album {
+  font-size: 14px;
+  overflow: hidden;
+  height: 20px;
+  display: block;
+}
+#bar {
+  height: 45px;
+  width: 540px;
+  background: #1f1f1f;
+  position: relative;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+#right {
+  width: 305px;
+  float: left;
+  padding-left: 30px;
+}
+#loginform {
+  display: none;
+  position: absolute;
+  top: 70px;
+  padding: 10px;
+  padding-left: 20px;
+  padding-bottom: 20px;
+  border-radius: 5px;
+  width: 255px;
+  border: 1px solid #ddd;
+  background: #fff;
+  left: 273px;
+  box-shadow: 0px 0px 36px #b6b6b6;
+}
+#timer {
+  font-size: 16px;
+  color: #bfbfbf;
+  float: right;
+  margin-bottom: 5px;
+  margin-right: 10px;
+}
+#vol {
+  width: 20px;
+  height: 70px;
+  float: right;
+  margin-right: 30px;
+  margin-top: -50px;
+  position: relative;
+}
+#vol:hover #vol_bar {
+  display: block;
+}
+#vol:hover #vol_block {
+  background: url("../images/vol_hover.png");
+}
+#vol_bar {
+  display: none;
+  width: 4px;
+  height: 50px;
+  background: #adadad;
+  margin-left: 8px;
+  border-radius: 2px;
+  position: relative;
+}
+#vol_bar_in {
+  width: 4px;
+  height: 31px;
+  background: #333;
+  position: absolute;
+  bottom: 0;
+  border-radius: 2px;
+}
+#vol_block {
+  width: 20px;
+  height: 20px;
+  background: url("../images/vol.png");
+  position: absolute;
+  bottom: 0;
+}
+#progress {
+  clear: both;
+  background: #aeaeae;
+  height: 4px;
+  width: 275px;
+  display: block;
+  margin: 10px 0;
+}
+#status {
+  height: 4px;
+  background: #ff6d68;
+}
+#controller>div {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  margin-right: 20px;
+}
+#controller>div:hover {
+  opacity: 0.6;
+  cursor: pointer;
+}
+#fave,
+#trash,
+#pause,
+#next {
+  background: url("../images/play.png");
+}
+#fave {
+  background-position: 0 0;
+}
+#trash {
+  background-position: 250px 0;
+}
+#pause {
+  background-position: 150px 0;
+}
+#pause.paused {
+  background-position: 50px 0;
+}
+#controller #next {
+  background-position: 200px 0;
+  margin-right: 25px;
+}
+#fave:hover,
+#fave.faved {
+  background-position: -199px 0;
+}
+label {
+  margin-right: 10px;
+  color: #333;
+}
+input {
+  margin-bottom: 10px;
+  width: 185px;
+}
+#login,
+#cancel {
+  background: #fff;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  height: 25px;
+  width: 60px;
+  line-height: 25px;
+  text-align: center;
+  cursor: pointer;
+  float: left;
+}
+#cancel:hover,
+#login:hover {
+  background: #333;
+  color: #fff;
+}
+#cancel {
+  float: right;
+  margin-right: 20px;
+}
+#app {
+  color: #eee;
+  font-size: 18px;
+  margin: 0;
+  padding: 10px;
+  padding-left: 20px;
+}
+.close {
+  color: #ccc;
+  width: 45px;
+  height: 45px;
+  position: absolute;
+  background: #1f1f1f;
+  top: 0;
+  right: 0;
+  text-align: center;
+  line-height: 40px;
+  font-size: 45px;
+  cursor: pointer;
+}
+.close:hover {
+  color: #fff;
+  background: #2f2f2f;
+  -webkit-user-select: none;
+  -webkit-app-region: no-drag;
+}
