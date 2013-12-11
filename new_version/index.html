@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DoubanFm</title>
+    <link rel="stylesheet" href="stylesheets/style.css"/>
+	<script type="text/javascript" src="./javascripts/jquery.min.js"></script>
+	<script type="text/javascript" src="./javascripts/jquery.jplayer.min.js"></script>
+	<script type="text/javascript" src="./javascripts/storage.min.js"></script>
+	<script type="text/javascript" src="./javascripts/jquery.grab.js"></script>
+</head>
+<body>
+	<div id="bar">
+		<h1 id="app">Douban.FM</h1>
+	</div>
+    <div class="close" onclick="window.close();return false;">&times;</div>
+	<iframe  frameborder="0" id="iframe" style="display: none;"></iframe>
+	<img id="poster" src="" alt="">
+	<div id="right">
+		<h2 id="title">Waiting...</h2>
+		<h3 id="artist">To the Response</h3>
+		<h4 id="album">From Server</h4>
+		<div id="current_progress">
+			<div id="vol">
+				<div id="vol_bar">
+					<div id="vol_bar_in"></div>
+				</div>
+				<div id="vol_block"></div>
+			</div>
+			<div id="timer">-03:40</div>
+			<div id="progress">
+				<div id="status" style="width: 0"></div>
+			</div>
+		</div>
+		<div id="controller">
+			<div id="fave"></div>
+			<div id="trash"></div>
+			<div id="pause"></div>
+			<div id="next"></div>
+		</div>
+		<div id="loginform">
+			<h3 id="user_name">未登录</h3>
+			<label for="email">邮箱:</label><input type="email" id="email" placeholder="Email:">
+			<br/>
+			<label for="password">密码:</label><input type="password" id="password" placeholder="Password">
+			<div id='login'>登录</div>
+			<div id='cancel'>取消</div>
+		</div>
+	</div>
+	<script>
+
+	</script>
+    <script src="javascripts/main.js"></script>
+</body>
+</html>
