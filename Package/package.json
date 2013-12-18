@@ -33,12 +33,12 @@
     "icon": "fm.ico",
     "toolbar": false,
     "width": 585,
-    "height": 290, //290 325
+    "height": 295, //290 325
 	"frame":false,
     "transparent": true,
     "min_width": 585,
-    "min_height": 290,
+    "min_height": 295,
     "max_width": 585,
-    "max_height": 290
+    "max_height": 295
   }
 }

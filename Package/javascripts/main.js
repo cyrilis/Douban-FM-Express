@@ -9,8 +9,10 @@ var i=0
     ,currentSong
     ,logindata
     ,user_items=["email","islogin","user_name",'user_id','expire','token','password']
-    ,channel=0
-    ,user={islogin:false}
+    ,channel=1
+    ,user={
+        islogin:false
+    }
     ,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
 var getp=false;
 var gui = require('nw.gui');
@@ -53,12 +55,12 @@ $('#next').click(function(){
     next();
 });
 $('#pause').click(function(){
-    if($(this).hasClass("paused")){
+    if($(this).hasClass("icon-play")){
         $jp.jPlayer("play");
-        $(this).toggleClass("paused");
+        $(this).toggleClass("icon-play");
     }else{
         $jp.jPlayer('pause');
-        $(this).toggleClass("paused");
+        $(this).toggleClass("icon-play");
     }
 });
 $('#trash').click(function(){
@@ -72,7 +74,11 @@ $jp.bind($.jPlayer.event.ended, function(event) {
 $jp.bind($.jPlayer.event.play, function(event) {
     currentSong=songs[i];
     fdata.sid=currentSong.sid;
-    $("#poster").attr("src",$jp.find("img").attr("src"));
+    var cover = $jp.find("img").attr("src");
+    $("#poster").find("img").attr("src",cover).end().parent().css("background",cover);
+    $.adaptiveBackground.run({
+        parent: "body"
+    });
     $("h2#title").html(currentSong.title).attr("title",currentSong.title);
     $("h3#artist").html(currentSong.artist);
     $("h4#album").html(currentSong.albumtitle);
@@ -328,7 +334,15 @@ document.addEventListener("keyup",function(e){
     }
 });
 
-$("#poster").on('click',function(){
+var $poster = $("#poster");
+$poster.on('click',function(){
     var link ="http://music.douban.com"+songs[i].album;
     gui.Shell.openExternal(link);
+});
+// adaptive background
+$poster.find("img").on('ab-color-found', function(e, data) {
+    $("#controller").find("div").css({
+        color: data.palette[0].replace(',0.8)', ",1)")
+    });
+    console.log("Color:",data.palette[0].replace(',0.8)',",1"));
 });

@@ -71,7 +71,7 @@ $jp.bind($.jPlayer.event.ended, function(event) {
 $jp.bind($.jPlayer.event.play, function(event) {
     currentSong=songs[i];
     fdata.sid=currentSong.sid;
-    $("#poster").attr("src",$jp.find("img").attr("src"));
+    $("#poster img").attr("src",$jp.find("img").attr("src"));
     $("h2#title").html(currentSong.title).attr("title",currentSong.title);
     $("h3#artist").html(currentSong.artist);
     $("h4#album").html(currentSong.albumtitle);

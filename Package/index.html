@@ -4,7 +4,9 @@
 	<meta charset="UTF-8">
 	<title>DoubanFm</title>
     <link rel="stylesheet" href="stylesheets/style.css"/>
+    <link rel="stylesheet" href="stylesheets/icon.css"/>
 	<script type="text/javascript" src="./javascripts/jquery.min.js"></script>
+	<script type="text/javascript" src="./javascripts/jquery.adaptive-backgrounds.min.js"></script>
 	<script type="text/javascript" src="./javascripts/jquery.jplayer.min.js"></script>
 	<script type="text/javascript" src="./javascripts/storage.min.js"></script>
 	<script type="text/javascript" src="./javascripts/jquery.grab.js"></script>
@@ -15,7 +17,9 @@
 	</div>
     <div class="close" onclick="window.close();return false;">&times;</div>
 	<iframe  frameborder="0" id="iframe" style="display: none;"></iframe>
-	<img id="poster" src="" alt="">
+    <div id="poster">
+        <img src="./images/cover.png" alt="" data-adaptive-background='1'>
+    </div>
 	<div id="right">
 		<h2 id="title">Waiting...</h2>
 		<h3 id="artist">To the Response</h3>
@@ -25,7 +29,7 @@
 				<div id="vol_bar">
 					<div id="vol_bar_in"></div>
 				</div>
-				<div id="vol_block"></div>
+				<div id="vol_block" class="icon-volume-medium"></div>
 			</div>
 			<div id="timer">-03:40</div>
 			<div id="progress">
@@ -33,10 +37,10 @@
 			</div>
 		</div>
 		<div id="controller">
-			<div id="fave"></div>
-			<div id="trash"></div>
-			<div id="pause"></div>
-			<div id="next"></div>
+			<div id="fave" class="icon-heart"></div>
+			<div id="trash" class="icon-remove"></div>
+			<div id="pause" class="icon-pause icon-play"></div>
+			<div id="next" class="icon-forward"></div>
 		</div>
 		<div id="loginform">
 			<h3 id="user_name">未登录</h3>

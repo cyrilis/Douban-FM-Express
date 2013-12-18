@@ -6,23 +6,39 @@
   font-family: 'xin';
   src: url("Xin.otf");
 }
+@-webkit-keyframes rotating {
+  from{
+    -webkit-transform: rotate(0deg);
+  }
+  to{
+    -webkit-transform: rotate(360deg);
+  }
+}
 body{
   font-family: "xin","Microsoft Yahei";
   margin: 0;
   padding: 0;
   width: 585px;
-  height: 290px;
+  height: 295px;
   overflow: hidden;
   -webkit-user-select:none;
+  position: relative
 }
-#poster{
-  width: 250px;
-  height: auto;
+#poster
+  width: 240px;
+  height: 240px;
+  overflow hidden
   display: block;
   float: left;
   background: url(../images/cover.png);
-  cursor: pointer
-}
+  cursor: pointer;
+  border-radius: 250px;
+  -webkit-animation: rotating 10s linear infinite;
+  border: 5px solid #8F8F8F;
+  img
+    width 100%
+    height auto
+
 h1,h2,h3,h4,h5,h6{
   font-weight: 500;
   margin: 10px 0;
@@ -98,14 +114,14 @@ button:hover{
   display: block;
 }
 #vol:hover #vol_block{
-  background: url(../images/vol_hover.png);
+  color #333
 }
 #vol_bar{
   display: none;
   width: 4px;
   height: 50px;
   background: #ADADAD;
-  margin-left: 8px;
+  margin-left: 6px;
   border-radius: 2px;
   position: relative;
 }
@@ -121,7 +137,8 @@ button:hover{
 #vol_block{
   width: 20px;
   height: 20px;
-  background: url(../images/vol.png);
+  font-size 20px;
+  color #858585;
   position: absolute;
   bottom: 0;
 }
@@ -142,32 +159,25 @@ button:hover{
   width: 50px;
   height: 50px;
   margin-right: 20px;
+  font-size: 40px;
+  color: #555;
+  background: none;
+  line-height: 50px;
+  text-align: center;
 }
 #controller>div:hover{
   opacity: 0.6;
   cursor: pointer;
 }
-#fave ,#trash, #pause, #next{
-  background: url(../images/play.png);
-}
-#fave{
-  background-position: 0 0;
-}
-#trash{
-  background-position: 250px 0;
-}
-#pause{
-  background-position: 150px 0;
-}
-#pause.paused{
-  background-position: 50px 0;
-}
 #controller #next{
-  background-position: 200px 0;
   margin-right: 25px;
 }
+#controller #pause,#controller #next{
+  font-size 45px;
+  vertical-align bottom
+}
 #fave:hover,#fave.faved{
-  background-position: -199px 0;
+  color #f44a6e
 }
 label{
   margin-right: 10px;
