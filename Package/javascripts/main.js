@@ -13,6 +13,7 @@ var i=0
     ,user={islogin:false}
     ,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
 var getp=false;
+var gui = require('nw.gui');
 $jp.jPlayer({timeupdate: function(event) {
         $("#status").attr("style" , "width:"+parseInt(event.jPlayer.status.currentPercentAbsolute, 10)+"%");
         timeLeft = event.jPlayer.status.duration - event.jPlayer.status.currentTime;
@@ -112,6 +113,7 @@ function next(){
         newlist();
     }
 }
+
 
 
 function getsonginfo(){
@@ -324,4 +326,9 @@ document.addEventListener("keyup",function(e){
         console.log('Show DevTool');
         require('nw.gui').Window.get().showDevTools();
     }
+});
+
+$("#poster").on('click',function(){
+    var link ="http://music.douban.com"+songs[i].album;
+    gui.Shell.openExternal(link);
 });

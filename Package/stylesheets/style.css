@@ -16,10 +16,11 @@ body {
 }
 #poster {
   width: 250px;
-  height: 250px;
+  height: auto;
   display: block;
   float: left;
   background: url("../images/cover.png");
+  cursor: pointer;
 }
 h1,
 h2,
