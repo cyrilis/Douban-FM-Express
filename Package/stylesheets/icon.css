@@ -22,12 +22,11 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
-
+.icon-pause:before {
+    content: "\e601";
+}
 .icon-play:before {
 	content: "\e600";
-}
-.icon-pause:before {
-	content: "\e601";
 }
 .icon-stop:before {
 	content: "\e602";

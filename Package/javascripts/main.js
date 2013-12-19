@@ -58,8 +58,10 @@ $('#pause').click(function(){
     if($(this).hasClass("icon-play")){
         $jp.jPlayer("play");
         $(this).toggleClass("icon-play");
+        $('#poster').removeClass('paused');
     }else{
         $jp.jPlayer('pause');
+        $('#poster').addClass('paused');
         $(this).toggleClass("icon-play");
     }
 });
@@ -76,6 +78,7 @@ $jp.bind($.jPlayer.event.play, function(event) {
     fdata.sid=currentSong.sid;
     var cover = $jp.find("img").attr("src");
     $("#poster").find("img").attr("src",cover).end().parent().css("background",cover);
+    $('#style').html("body:before{background: url("+cover+")}")
     $.adaptiveBackground.run({
         parent: "body"
     });
@@ -83,9 +86,9 @@ $jp.bind($.jPlayer.event.play, function(event) {
     $("h3#artist").html(currentSong.artist);
     $("h4#album").html(currentSong.albumtitle);
     if(currentSong.like==1){
-        $("#fave").addClass("faved");
+        $("#fave").addClass("faved").css({color:'rgb(244, 74, 110)'});
     }else{
-        $("#fave").removeClass("faved");
+        $("#fave").removeClass("faved").css({color:$('#trash').css("color")});
     }
     //getsonginfo();
 });
@@ -204,7 +207,7 @@ function fave(){
         pdata.type="r";
         pdata.sid=currentSong.sid;
         var faveit=function(){
-            $("#fave").addClass("faved");
+            $("#fave").addClass("faved").css({color:'rgb(244, 74, 110)'});
         };
         playlist(faveit,pdata);
     }else{
@@ -218,7 +221,7 @@ function unfave(){
     pdata.type="u";
     var unfaveit=function(){
         i=0;
-        $("#fave").removeClass("faved");
+        $("#fave").removeClass("faved").css({color:$('#trash').css("color")});
     };
     playlist(unfaveit,pdata)
 }
@@ -342,7 +345,8 @@ $poster.on('click',function(){
 // adaptive background
 $poster.find("img").on('ab-color-found', function(e, data) {
     $("#controller").find("div").css({
-        color: data.palette[0].replace(',0.8)', ",1)")
+        color: data.palette[0].replace('0.7)', "1)")
     });
-    console.log("Color:",data.palette[0].replace(',0.8)',",1"));
+    $("#fave").hasClass('faved')? $('#fave').css({color: 'rgb(244, 74, 110)'}):"";
+    console.log("Color:",data.palette[0].replace('0.7)',"1)"));
 });

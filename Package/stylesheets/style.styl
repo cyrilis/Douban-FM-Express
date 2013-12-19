@@ -24,9 +24,22 @@ body{
   -webkit-user-select:none;
   position: relative
 }
+body:before {
+  content: "";
+  position: absolute;
+  height: 100%; width: 100%;
+  background: url(../images/cover.png);
+  background-size: cover;
+  z-index: -1;
+  -webkit-transform: scale(1);
+  -webkit-transform-origin: top left;
+  -webkit-filter: blur(10px);
+  opacity 0.8
+}
 #poster
-  width: 240px;
-  height: 240px;
+  width: 200px;
+  height: 200px;
+  margin: 20px 0 0 20px
   overflow hidden
   display: block;
   float: left;
@@ -39,6 +52,11 @@ body{
     width 100%
     height auto
 
+
+#poster.paused
+  animation-play-state:paused;
+  -webkit-animation-play-state:paused;
+
 h1,h2,h3,h4,h5,h6{
   font-weight: 500;
   margin: 10px 0;
@@ -50,23 +68,33 @@ button:hover{
   padding-top: 30px;
   font-size: 25px;
   line-height: 28px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  padding-bottom 10px
   margin-top: 0;
   height: 28px;
   overflow: hidden;
   font-family :"xin","Microsoft YaHei";
+  color: #ffffff;
+  text-shadow 0 0 10px rgba(0,0,0,0.75);
+  padding-left 5px
 }
 #artist{
   font-size: 19px;
   display: block;
   height: 24px;
   overflow: hidden;
+  color: #ffffff;
+  text-shadow 0 0 10px rgba(0,0,0,0.75);
+  padding-left 5px
 }
 #album{
   font-size: 14px;
   overflow: hidden;
   height: 20px;
   display: block;
+  color: #ffffff;
+  text-shadow 0 0 10px rgba(0,0,0,0.75);
+  padding-left 5px
 }
 #bar{
   height: 45px;
@@ -155,6 +183,7 @@ button:hover{
   background: #ff6d68;
 }
 #controller>div{
+  text-shadow: 0 0 5px #747474;
   display: inline-block;
   width: 50px;
   height: 50px;
