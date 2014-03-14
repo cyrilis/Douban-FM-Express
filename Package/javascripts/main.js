@@ -55,7 +55,7 @@ $('#next').click(function(){
     next();
 });
 $('#pause').click(function(){
-    if($(this).hasClass("icon-play")){
+    if(!$(this).hasClass("icon-play")){
         $jp.jPlayer("play");
         $(this).toggleClass("icon-play");
         $('#poster').removeClass('paused');
