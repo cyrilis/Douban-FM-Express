@@ -15,7 +15,7 @@ var i=0
     }
     ,$jp=$("#iframe").contents().find("body").append("<div id='jplayer'></div>").find("#jplayer");
 var getp=false;
-var gui = require('nw.gui');
+//var gui = require('nw.gui');
 $jp.jPlayer({timeupdate: function(event) {
         $("#status").attr("style" , "width:"+parseInt(event.jPlayer.status.currentPercentAbsolute, 10)+"%");
         timeLeft = event.jPlayer.status.duration - event.jPlayer.status.currentTime;
