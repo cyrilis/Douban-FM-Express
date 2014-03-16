@@ -21,6 +21,17 @@
     * @class DoubanFmExpress
     */
 
+    // Define Statics
+    var APIURL;
+    var debug = true;
+    var require = require;
+    if(require&&!debug){
+        APIURL = "http://www.douban.com/j/app/";
+    }else{
+        APIURL = "http://localhost:9000/j/app/";
+    }
+
+    // Main Class
     function DoubanFmExpress (obj){
         this.defaultConfig = {
             autoPlay: true,
@@ -44,13 +55,18 @@
     function _makeDom(){
         var iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
-        iframe.contentDocument.body.innerHTML = '<audio src="1.mp3"></audio>';
+        iframe.contentDocument.body.innerHTML = '<audio src="images/1.mp3"></audio>';
         _player().volume = 0.5;
         _player().play();
         document.body.addEventListener('click',function(){
             _isPlaying()? _player().pause():_player().play();
             console.log('Paused');
         })
+    }
+
+    // Bind Event
+    function _bindEvent(){
+
     }
 
     // Get play status
@@ -66,6 +82,41 @@
     function _setUrl(url){
         _player().src=url;
         return _player();
+    }
+
+    // Get Channels
+    function _getChannels (){
+        _ajax({
+            url: APIURL + "radio/channels",
+            method: 'GET',
+            success: function(data){
+                console.log(data);
+            },
+            error: function(){
+                console.log("Error!");
+                throw new Error('Net Wrok Error!');
+            }
+        })
+
+    }
+
+    // Ajax library
+    function _ajax(obj){
+        var request = new XMLHttpRequest();
+        request.open(obj.method, obj.url, true);
+        request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+        request.onload = function() {
+            if (request.status >= 200 && request.status < 400){
+                obj.success(JSON.parse(request.responseText));
+            } else {
+                obj.error();
+            }
+        };
+
+        request.onerror = function() {
+            obj.error();
+        };
+        request.send(obj.data||null);
     }
 
     // FadeOut Effect
@@ -87,10 +138,7 @@
         loopVol();
     }
 
-    // FadeIn Effect
-    function _fadeIn(){
 
-    }
     // set the Volume of Player
     function _setVolume(n){
         _player().volume = typeof n ==='number'?n/100: + _player().volume * n.slice(0,-1)/100;
@@ -100,6 +148,8 @@
     function _init(){
         _makeDom();
         window._player = _player();
+        _getChannels();
+        _bindEvent();
     }
     // Prototype inheritance
     DoubanFmExpress.fn = DoubanFmExpress.prototype = {
