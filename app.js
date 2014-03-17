@@ -44,7 +44,9 @@ server.createServer(function(q,s){
         console.log('===================================REQUEST-ERROR======================================');
     });
 
-    request.write('\n');
+    if(q.method==='GET'){
+        request.write('\n');
+    }
     var request_data = "";
     q.on('data', function ( chunk ){
         console.log( 'Write to server ', chunk.length );

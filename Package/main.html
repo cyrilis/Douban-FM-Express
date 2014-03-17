@@ -9,8 +9,12 @@
     <script src="javascripts/application.js"></script>
 </head>
 <body>
+<button onclick="doubanFM.playOrPause();">Play</button>
+<button onclick="doubanFM.next();">next</button>
+<button onclick="doubanFM.stop();">Stop</button>
+<button onclick="doubanFM.fave();">Star</button>
 <script>
-    var doc = new DoubanFmExpress({});
+    var doubanFM = new DoubanFmExpress({});
 </script>
 </body>
 </html>

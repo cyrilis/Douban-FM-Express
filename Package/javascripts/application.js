@@ -25,6 +25,18 @@
     var APIURL;
     var debug = true;
     var require = require;
+    var _currentSong = {};
+    var _currentUser = localStorage['user.user_id'] ?{
+        email:     localStorage['user.email'],
+        expire:    localStorage['user.expire'],
+        token:     localStorage['user.token'],
+        user_id:   localStorage['user.user_id'],
+        user_name: localStorage['user.user_name']
+    } :{};
+    var _currentChannel = localStorage['channel']||1,_currentPlaylist = [];
+    var _self = this;
+    var _history = [];
+    var _currentPlaylistId = 0;
     if(require&&!debug){
         APIURL = "http://www.douban.com/j/app/";
     }else{
@@ -33,10 +45,11 @@
 
     // Main Class
     function DoubanFmExpress (obj){
+        _self = this;
         this.defaultConfig = {
-            autoPlay: true,
-            channel: 1,
-            mode: 'queue'
+            autoPlay: localStorage['config.autoPlay']||true,
+            channel: localStorage['config.channel']||1,
+            mode: localStorage['config.mode']||'queue' // Optins : 'queue', 'loop'
         };
         var _config = {};
         for(var _key in this.defaultConfig){
@@ -59,14 +72,17 @@
         _player().volume = 0.5;
         _player().play();
         document.body.addEventListener('click',function(){
-            _isPlaying()? _player().pause():_player().play();
+//            _isPlaying()? _player().pause():_player().play();
             console.log('Paused');
-        })
+        });
+        // play next after current song ended
+        _player().addEventListener('ended', function(){
+            _next();
+        },false);
     }
 
     // Bind Event
     function _bindEvent(){
-
     }
 
     // Get play status
@@ -79,29 +95,196 @@
     }
 
     // Set Audio source of the player
-    function _setUrl(url){
-        _player().src=url;
-        return _player();
+    function _setUrl(playlistId){
+        if(_isPlaying()){
+            _fadeOut();
+            window.setTimeout(function(){
+                _player().src=_currentPlaylist[playlistId].url;
+                _currentSong = _currentPlaylist[playlistId];
+                _currentPlaylistId = playlistId;
+                _player().play();
+            },1100);
+        }else{
+            _player().src=_currentPlaylist[playlistId].url;
+            _currentSong = _currentPlaylist[playlistId];
+            _currentPlaylistId = playlistId;
+            _player().play();
+        }
     }
 
+    // flash notify message
+    function _flash(className,message){
+        console.error(message);
+    }
+
+    // Save to Storage
+    function _saveStorage(data,keyName) {
+        var keyCount = 0;
+        for(var key in data){
+            if(data.hasOwnProperty(key)){
+                localStorage[keyName+"."+key] = data[key];
+                keyCount++;
+            }
+        }
+        if(!keyCount){
+            localStorage[keyName] = data;
+        }
+    }
+    // Get Storage
+    function _getStorage(keyName){
+        return localStorage[keyName];
+    }
+
+    function _getHistory (){
+        _history.join("|");
+    }
+    function _clearHitory(){
+        _history = [];
+    }
     // Get Channels
     function _getChannels (){
         _ajax({
             url: APIURL + "radio/channels",
             method: 'GET',
             success: function(data){
-                console.log(data);
+                if(data.e){
+                    console.log('New Error');
+                }else{
+                    console.log(data);
+                    var selectChannel = document.createElement('select');
+                    var options = [];
+                    data.channels.forEach(function(e){
+                        options.push('<option value=\''+ e.channel_id+'\'>'+ e.name+'</option>');
+                    });
+                    selectChannel.innerHTML = options.join('');
+                    selectChannel.onchange = function(){
+                        var newValue = this.options[this.selectedIndex].value;
+                        console.log(newValue);
+                        _changeChannel(newValue);
+                    };
+                    document.body.appendChild(selectChannel);
+                }
             },
             error: function(){
                 console.log("Error!");
+                _flash('error',"Get channels Failed, Please check your network");
                 throw new Error('Net Wrok Error!');
             }
-        })
+        });
+    }
 
+    function _getPlayList(channel_id,type){
+        var data =  {
+            app_name: "radio_desktop_win",
+            version: "100",
+            h: _getHistory(),
+            channel: channel_id||_currentChannel,
+            type: type,
+            sid: null
+        };
+        if(type === "n"){
+            delete data.sid
+        }else{
+            data.sid = _currentSong.sid
+        }
+        type === "p"? data.h = _getHistory():delete data.h;
+        if(_currentUser.user_id){
+            data.user_id=_currentUser.user_id;
+            data.expire= _currentUser.expire;
+            data.token= _currentUser.token;
+        }else{
+            delete data.h;
+        }
+        if(data.h){
+            _clearHitory();
+        }
+        debug && console.log(data);
+        _ajax({
+            url: APIURL + "radio/people",
+            method: "GET",
+            data: data,
+            success: function(data){
+                if(data.r){
+                    _flash('error',"Get Playlist Failed because:"+ data.err);
+                    return;
+                }
+                debug&&console.log(data);
+                _currentChannel = channel_id||_currentChannel;
+                _saveStorage(channel_id,'channel');
+                _currentPlaylist = data.song;
+                _setUrl(0);
+            },
+            error: function(){}
+        })
+    }
+
+    function _changeChannel(n){
+        _getPlayList(n,'p');
+    }
+    function _next (force){
+        if(_currentPlaylistId>=_currentPlaylist.length-1){
+            var type = !force ? 'p' : 's';
+            if(!_currentPlaylist){
+                type = 'n';
+            }
+            _currentPlaylistId = 0;
+            _getPlayList(null,type);
+        }else{
+            _setUrl(_currentPlaylistId+1);
+        }
+        _history.push(_currentPlaylist[_currentPlaylistId].sid + (force ? ':s': ':p'));
+    }
+
+    function _fave(){
+        if(!_currentUser.user_id){
+            _flash('error',"You haven't login yet.");
+            return;
+        }
+        _getPlayList(_currentChannel,'r');
+    }
+
+    function _login (userEmail, userPassword){
+        _ajax({
+            method:"POST",
+            url: APIURL+'login',
+            data: {
+                version: '100',
+                app_name: 'radio_desktop_win',
+                email: userEmail,
+                password: userPassword
+            },
+            success: function(data){
+                if(!data.r){
+                    _currentUser = data;
+                    _saveStorage(_currentUser,'user');
+                    _getPlayList("0","n");
+                    _flash('success',"User Login successfully");
+                }else{
+                    _flash('error', "Login Failed because of:"+ data.err);
+                }
+
+            },
+            error: function (){
+                _flash('error', "User login Failed because of Network Error");
+            }
+        });
     }
 
     // Ajax library
     function _ajax(obj){
+        var urlEncode = [];
+        for(var key in obj.data){
+            if(obj.data.hasOwnProperty(key)){
+                urlEncode.push(key+'='+obj.data[key]);
+            }
+        }
+        if(obj.method == "GET"){
+            obj.url+=("?"+urlEncode.join('&'));
+            console.log(obj.url);
+            delete obj.data;
+        }else{
+            obj.data = urlEncode.join('&');
+        }
         var request = new XMLHttpRequest();
         request.open(obj.method, obj.url, true);
         request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -123,10 +306,11 @@
     function _fadeOut(){
         var i = 0, max = 100;
         var volume = _player().volume;
+        console.log(volume);
         function loopVol(){
             if(i>max){
                 _player().pause();
-                _setVolume(volume);
+                _setVolume(volume*100);
                 return false;
             }
             window.setTimeout(function(){
@@ -150,6 +334,8 @@
         window._player = _player();
         _getChannels();
         _bindEvent();
+        console.log(_self);
+        _getPlayList(_self.defaultConfig.channel,"n");
     }
     // Prototype inheritance
     DoubanFmExpress.fn = DoubanFmExpress.prototype = {
@@ -166,19 +352,23 @@
             _player().load();
         },
         // Play next song
-        next: function(){},
+        next: _next,
         // Play Previous Song
         previous: function(){},
         // Set play mode (queue, one-repeat)
         changeMode: function(){},
         // Change to another Channel
-        changeChannel: function(n){},
+        changeChannel: _changeChannel,
         // Get current song's information
-        currentInfo: function(){},
+        currentInfo: function(){return _currentSong},
         // Login to Douban.fm
-        login:function(){},
+        login:_login,
         // Add current song to fave list
-        fave: function(){}
+        fave: _fave,
+        // Toggle Play or Pause
+        playOrPause: function(){
+            _isPlaying()? this.pause(): this.play();
+        }
     };
     exports.DoubanFmExpress = DoubanFmExpress;
     return DoubanFmExpress;
