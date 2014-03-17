@@ -13,8 +13,22 @@
 <button onclick="doubanFM.next();">next</button>
 <button onclick="doubanFM.stop();">Stop</button>
 <button onclick="doubanFM.fave();">Star</button>
+<form action="#" onsubmit="return radioLogin();">
+    <label for="user_email">User Email</label>
+    <input type="text" id="user_email"/>
+    <label for="user_password">User Password</label>
+    <input type="password" id="user_password"/>
+    <input type="submit" value="Login"/>
+</form>
 <script>
     var doubanFM = new DoubanFmExpress({});
+    function radioLogin (){
+        var userEmail = document.querySelector('#user_email').value;
+        var userPassword = document.querySelector('#user_password').value;
+        doubanFM.login(userEmail,userPassword);
+        this.style.display = 'none';
+        return false;
+    }
 </script>
 </body>
 </html>

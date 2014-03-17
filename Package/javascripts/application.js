@@ -211,8 +211,13 @@
                 debug&&console.log(data);
                 _currentChannel = channel_id||_currentChannel;
                 _saveStorage(channel_id,'channel');
-                _currentPlaylist = data.song;
-                _setUrl(0);
+
+                if(type === 'r'){
+                    _currentPlaylist.push(data.song);
+                }else{
+                    _currentPlaylist = data.song;
+                    _setUrl(0);
+                }
             },
             error: function(){}
         })
