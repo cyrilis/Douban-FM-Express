@@ -1,5 +1,6 @@
 var server = require('http');
-var remoteServer = 'www.douban.com';
+var remoteServer = process.argv.indexOf('-d')>0 ? process.argv[process.argv.indexOf('-d')+1]:"www.douban.com";
+var listenPort = process.argv.indexOf('-p')>0 ? +process.argv[process.argv.indexOf('-p')+1]: process.env.PORT || 9000;
 var http = require('http');
 server.createServer(function(q,s){
 //    console.dir(q);
@@ -34,14 +35,14 @@ server.createServer(function(q,s){
         res.on('error', function ( e ){
             console.log( 'Error with client ', e );
             request.end();
-            console.log('===================================DATA-ERROR===================================');
+            console.log('DATA-ERROR');
         });
     });
 
     request.on('error', function(e) {
         console.log(e);
         s.end('<h1>ERROR WHILE REQUEST REMOTE URL... =_=</h1>');
-        console.log('===================================REQUEST-ERROR======================================');
+        console.log('REQUEST-ERROR');
     });
 
     if(q.method==='GET'){
@@ -63,24 +64,5 @@ server.createServer(function(q,s){
         console.log( 'Problem with request ', e );
     } );
 
-}).listen(9000);
-console.log( 'Proxy started on port ' + 9000 );
-
-
-//var req = http.request(options, function(res) {
-//    console.log('STATUS: ' + res.statusCode);
-//    console.log('HEADERS: ' + JSON.stringify(res.headers));
-//    res.setEncoding('utf8');
-//    res.on('data', function (chunk) {
-//        console.log('BODY: ' + chunk);
-//    });
-//});
-//
-//req.on('error', function(e) {
-//    console.log('problem with request: ' + e.message);
-//});
-//
-//// write data to request body
-//req.write('data\n');
-//req.write('data\n');
-//req.end();
+}).listen(listenPort);
+console.log( 'Proxy started on port ' + listenPort +", API domain is set to: "+ remoteServer );
