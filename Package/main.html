@@ -7,6 +7,32 @@
     <link rel="stylesheet" href="stylesheets/icon.css"/>
 	<script type="text/javascript" src="./javascripts/storage.min.js"></script>
     <script src="javascripts/application.js"></script>
+    <style>
+        .progress{
+            display: block;
+            position: relative;
+            width: 10px;
+            height: 300px;
+            background: #DDDDDD;
+            border: 1px solid #cccccc;
+        }
+        .currentTime{
+            display: block;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 10px;
+            background: #ff6d68;
+        }
+        .loadedTime{
+            display: block;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 10px;
+            background: #666666;
+        }
+    </style>
 </head>
 <body>
 <button onclick="doubanFM.playOrPause();">Play</button>
@@ -20,6 +46,11 @@
     <input type="password" id="user_password"/>
     <input type="submit" value="Login"/>
 </form>
+
+<div class="progress">
+    <div class="loadedTime"></div>
+    <div class="currentTime"></div>
+</div>
 <script>
     var doubanFM = new DoubanFmExpress({});
     function radioLogin (){
@@ -29,6 +60,13 @@
         this.style.display = 'none';
         return false;
     }
+    doubanFM.ready(function(){
+        console.log('Ready Fucntion Excued!');
+        doubanFM.player().onprogress = function(){
+            console.log(this.buffered.start(), this.buffered.end(), this.duration);
+        }
+    });
+
 </script>
 </body>
 </html>

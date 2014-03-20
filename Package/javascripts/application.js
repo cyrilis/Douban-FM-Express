@@ -1,7 +1,12 @@
+/**
+ *  Created by Cyril on 2014-03-15
+ */
+
 "use strict";
 
 (function(root, factory){
-    if(typeof exports == 'object'){
+    var define = define;
+    if(typeof exports === 'object'){
         // CommonJS
         factory(exports);
     }else if(typeof define === 'function' && define.amd){
@@ -33,10 +38,11 @@
         user_id:   localStorage['user.user_id'],
         user_name: localStorage['user.user_name']
     } :{};
-    var _currentChannel = localStorage['channel']||1,_currentPlaylist = [];
+    var _currentChannel = localStorage.channel||1,_currentPlaylist = [];
     var _self = this;
     var _history = [];
     var _currentPlaylistId = 0;
+    var _readyFunction = [];
     if(require&&!debug){
         APIURL = "http://www.douban.com/j/app/";
     }else{
@@ -69,12 +75,9 @@
         var iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
         iframe.contentDocument.body.innerHTML = '<audio src="images/1.mp3"></audio>';
+        iframe.style.display = 'none';
         _player().volume = 0.5;
         _player().play();
-        document.body.addEventListener('click',function(){
-//            _isPlaying()? _player().pause():_player().play();
-            console.log('Paused');
-        });
         // play next after current song ended
         _player().addEventListener('ended', function(){
             _next();
@@ -82,8 +85,17 @@
     }
 
     // Bind Event
-    function _bindEvent(){
+    function _bindEvent(eventName, eventCB){
+        this.addEventListener(eventName, function(e){eventCB(e);} ,false);
     }
+
+    function _fireEvent(elem, eventName, eventObj ){
+        // Create the event
+        var event = new CustomEvent ( eventName, {detail: eventObj});
+        // Dispatch/Trigger/Fire the event
+        (elem||document).dispatchEvent(event);
+    }
+
 
     // Get play status
     function _isPlaying(){
@@ -183,9 +195,9 @@
             sid: null
         };
         if(type === "n"){
-            delete data.sid
+            delete data.sid;
         }else{
-            data.sid = _currentSong.sid
+            data.sid = _currentSong.sid;
         }
         type === "p"? data.h = _getHistory():delete data.h;
         if(_currentUser.user_id){
@@ -195,7 +207,7 @@
         }else{
             delete data.h;
         }
-        if(data.h){
+        if(type === 'p'){
             _clearHitory();
         }
         debug && console.log(data);
@@ -211,16 +223,24 @@
                 debug&&console.log(data);
                 _currentChannel = channel_id||_currentChannel;
                 _saveStorage(channel_id,'channel');
-
+                if(type === 'u'){
+                    _currentSong.like = 0;
+                    console.log('Type is U');
+                }
                 if(type === 'r'){
                     _currentPlaylist.push(data.song);
+                    _currentSong.like = 1;
+                    console.log('Type is R');
                 }else{
                     _currentPlaylist = data.song;
                     _setUrl(0);
+                    console.log('Type is '+ type);
+                    _readyFunction.forEach(function(e){e();});
+                    _readyFunction = [];
                 }
             },
             error: function(){}
-        })
+        });
     }
 
     function _changeChannel(n){
@@ -245,7 +265,8 @@
             _flash('error',"You haven't login yet.");
             return;
         }
-        _getPlayList(_currentChannel,'r');
+        var type = _currentSong.like ? 'u': 'r';
+        _getPlayList(_currentChannel,type);
     }
 
     function _login (userEmail, userPassword){
@@ -283,7 +304,7 @@
                 urlEncode.push(key+'='+obj.data[key]);
             }
         }
-        if(obj.method == "GET"){
+        if(obj.method === "GET"){
             obj.url+=("?"+urlEncode.join('&'));
             console.log(obj.url);
             delete obj.data;
@@ -313,7 +334,7 @@
         var volume = _player().volume;
         console.log(volume);
         function loopVol(){
-            if(i>max){
+            if(i>=max){
                 _player().pause();
                 _setVolume(volume*100);
                 return false;
@@ -322,31 +343,39 @@
                 _setVolume(volume*(100-i));
                 i++;
                 loopVol();
-            },10)
+            },10);
         }
         loopVol();
     }
-
-
     // set the Volume of Player
     function _setVolume(n){
         _player().volume = typeof n ==='number'?n/100: + _player().volume * n.slice(0,-1)/100;
         return _player();
+    }
+    function _ready(fn){
+        _readyFunction.push(fn);
     }
     // setup DoubanFmExpress instance
     function _init(){
         _makeDom();
         window._player = _player();
         _getChannels();
-        _bindEvent();
-        console.log(_self);
         _getPlayList(_self.defaultConfig.channel,"n");
+        _player().addEventListener('play',function(){console.log('Play!!!!!!!!!!!!!');});
+        _player().addEventListener('pause',function(){console.log('Paused!!!!!!!!!!!');});
+        _readyFunction.forEach(function(e){e();});
     }
+
+
     // Prototype inheritance
     DoubanFmExpress.fn = DoubanFmExpress.prototype = {
         // Play
         play: function(){
             _player().play();
+        },
+        // Player
+        player: function(){
+            return _player();
         },
         // Pause
         pause: function(){
@@ -365,7 +394,7 @@
         // Change to another Channel
         changeChannel: _changeChannel,
         // Get current song's information
-        currentInfo: function(){return _currentSong},
+        currentInfo: function(){return _currentSong;},
         // Login to Douban.fm
         login:_login,
         // Add current song to fave list
@@ -373,8 +402,12 @@
         // Toggle Play or Pause
         playOrPause: function(){
             _isPlaying()? this.pause(): this.play();
-        }
+        },
+        ready: _ready
     };
+    DoubanFmExpress.prototype.ready(function(){
+        _bindEvent.bind(_player());
+    });
     exports.DoubanFmExpress = DoubanFmExpress;
     return DoubanFmExpress;
 }));
