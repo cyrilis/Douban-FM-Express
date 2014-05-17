@@ -5,7 +5,7 @@ INFO:  http://cyrilis.com/20130625.html
 
 Screenshot:
 -----------
-![](http://img.cyrilis.com/img/douban_radio.png)
+![](http://cyrilis.com/images/upload/1394303359232.jpg)
 
 Appearance has changed. and will update soon.
 
