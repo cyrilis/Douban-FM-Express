@@ -1,1 +1,4 @@
 .idea/
+*.js
+*.map
+!web/javascripts/lib/*.js
