@@ -14,7 +14,15 @@ requirejs.config
     paths:
         FM: "DoubanFm"
         Color: "Color"
-        Backbone: 'lib/backbone-min.js'
-        $       : 'lib/jquery.min.js'
+        jquery           : 'lib/jquery.min'
+        underscore  : 'lib/underscore-min'
+        Backbone    : 'lib/backbone-min'
+        app         : 'app'
+    shim:
+        Backbone:
+            deps: ['underscore', 'jquery']
+            exports: 'Backbone'
+        underscore:
+            exports: "_"
 
-requirejs['app']
+require ['app'], (app)->

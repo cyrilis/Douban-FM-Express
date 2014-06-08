@@ -1,2 +1,2 @@
 define ['DoubanFM'], (DoubanFM)->
-    new DoubanFM.render()
+    new DoubanFM()
