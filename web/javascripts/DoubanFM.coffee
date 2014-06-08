@@ -1,10 +1,13 @@
 define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
-    BASEURL = "http://www.douban.com/j/app/radio/people"
-
+    BASEURL     = "http://www.douban.com/j/app/radio/people"
     SONGINFOURL = "http://music.douban.com/api/song/info?song_id="
+    LOGINURL    = "http://www.douban.com/j/app/login"
 
     # DEVELOP ENV
-    BASEURL = "http://127.0.0.1:2222/j/app/radio/people"
+    BASEURL     = "http://127.0.0.1:2222/j/app/radio/people"
+    LOGINURL    = "http://127.0.0.1:2222/j/app/login"
+    SONGINFOURL = 'http://127.0.0.1:3333/api/song/info?song_id='
+    #require('nw.gui').Window.get().showDevTools()
 
     class SongModel extends Backbone.Model
         default:
@@ -46,9 +49,10 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
                 }
 
             if option and option.type is 'p'
-
                 data.h = option.h
-
+            if option?.sid
+                data.sid = option.sid
+            console.debug data
             $.ajax
                 url: BASEURL
                 type: "GET"
@@ -68,7 +72,6 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
 
                 error: ->
                     console.error "Error While Geting Song list.", arguments
-                    @trigger 'update'
             .done
 
     class SongView extends Backbone.View
@@ -77,8 +80,21 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
             console.debug @collection
             @initPlayer()
             @option = {}
+            @collection.on 'update', ()->
+                @render()
+            ### Global handler ###
             window.next = ()=>
                 @next()
+            window.unlike = ()=>
+                @unlike()
+            window.like = ()=>
+                @like()
+            window.skip = ()=>
+                @skip()
+            window.trash = ()=>
+                @trash()
+            ### Global handler end ###
+
             window.collection = @collection
         initPlayer: ()->
             @player = $("<iframe id='player'></iframe>").appendTo("body").contents().find('body').append('<audio id="core" src=""></audio>').find('#core')
@@ -94,18 +110,21 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
                     "|#{e.sid}:#{e.type}"
                 option.h = option.h.join("")
                 option.sid = @currentSong.get 'sid'
-                @history = []
-            console.debug option
             @next(option)
 
         next: (option)->
             console.log ("Next....")
-            if @noMoreSong() or option
+            if @noMoreSong() or option.fetch
+                if option?.type is 'p'
+                    @history = []
                 @collection.fetch(option) ()=>
                     if not @noMoreSong()
                         @currentSong = @newSong()
                         if not @currentSong then return false
                         @play @currentSong.toJSON()
+                    else
+                        console.error 'No more song ???? WTF!!!'
+
                 null
             else
                 @currentSong = @newSong()
@@ -151,19 +170,47 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
             @history.push @currentSong.toJSON()
         like: ->
             @markSong('r')
-            @next(_.extend (_.clone @option), {type : "r", sid: @currentSong?.get('sid')})
+            @collection.fetch(_.extend (_.clone @option), {type : "r", sid: @currentSong?.get('sid')})
 
         unlike: ->
             @markSong('u')
-            @next(_.extend (_.clone @option), {type : "u", sid: @currentSong?.get('sid')})
+            @collection.fetch(_.extend (_.clone @option), {type : "u", sid: @currentSong?.get('sid')})
 
         trash: ->
             @markSong('b')
-            @next(_.extend (_.clone @option), {type : "b", sid: @currentSong?.get('sid')})
+            @next(_.extend (_.clone @option), {fetch: true, type: "b", sid: @currentSong?.get('sid')})
+            console.log @collection.length, "Before Remove"
+            @collection.find(@currentSong).remove()
+            console.log @collection.length, "After Remove"
 
         skip: ->
             @markSong('s')
             @next()
 
+        login: ->
+            if @email and @password
+                data =
+                    app_name: "radio_desktop_win"
+                    version: "100"
+                    email: @email
+                    password: @password
+                $.ajax
+                    url: LOGINURL
+                    type: "POST"
+                    dataType: 'json'
+                    data: data
+                    success: (data)=>
+                        console.log data
+                        if not data.r
+                            @user.user_name = data.user_name
+                            @user.user_id   = data.user_id
+                            @user.token     = data.token
+                            @user.expire    = data.expire
+                            @option.user_id = data.user_id
+                            @option.expire  = data.expire
+                            @option.token   = data.token
+                            @trigger 'login', data
 
-
+                        else
+                            @trigger 'loginfailed'
+                            console.error(data)

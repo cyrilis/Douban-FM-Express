@@ -25,4 +25,4 @@ requirejs.config
         underscore:
             exports: "_"
 
-require ['app'], (app)->
+define ['app'], (app)->

@@ -2,3 +2,4 @@
 *.js
 *.map
 !web/javascripts/lib/*.js
+*.app/
