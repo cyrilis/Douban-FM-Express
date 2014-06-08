@@ -1,6 +1,8 @@
 define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
     BASEURL = "http://www.douban.com/j/app/radio/people"
 
+    SONGINFOURL = "http://music.douban.com/api/song/info?song_id="
+
     # DEVELOP ENV
     BASEURL = "http://127.0.0.1:2222/j/app/radio/people"
 
@@ -42,6 +44,11 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
                     token: option.token
                     channel: option.channel || 0
                 }
+
+            if option and option.type is 'p'
+
+                data.h = option.h
+
             $.ajax
                 url: BASEURL
                 type: "GET"
@@ -54,7 +61,7 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
                             song.picture = song.picture.replace /\/mpic\//, 'lpic'
                             return song
                         console.debug songs
-                        @set songs
+                        @add songs
                         console.log @models
                     else if data.r
                         console.debug data
@@ -69,42 +76,94 @@ define ['Backbone',"jquery","underscore"], (Backbone, $, _)->
             @collection = new SongCollection
             console.debug @collection
             @initPlayer()
+            @option = {}
+            window.next = ()=>
+                @next()
+            window.collection = @collection
         initPlayer: ()->
             @player = $("<iframe id='player'></iframe>").appendTo("body").contents().find('body').append('<audio id="core" src=""></audio>').find('#core')
+            @player.on 'ended', ()=>
+                @sendHistory()
             @next()
+        sendHistory: ->
+            option = {}
+            if @currentSong
+                @markSong('e')
+                option.type = "p"
+                option.h = _.map @history, (e,index)->
+                    "|#{e.sid}:#{e.type}"
+                option.h = option.h.join("")
+                option.sid = @currentSong.get 'sid'
+                @history = []
+            console.debug option
+            @next(option)
+
         next: (option)->
-            if @noMoreSong()
-                @collection.fetch() ()=>
+            console.log ("Next....")
+            if @noMoreSong() or option
+                @collection.fetch(option) ()=>
                     if not @noMoreSong()
-                        @currentSong = _.clone @newSong()
+                        @currentSong = @newSong()
                         if not @currentSong then return false
-                        @play @currentSong
+                        @play @currentSong.toJSON()
+                null
             else
-                @currentSong = _.clone @newSong()
-                if not @currentSong then return false
-                @play @currentSong
+                @currentSong = @newSong()
+                if not @currentSong
+                    console.error "No song?"
+                    return false
+                @play @currentSong.toJSON()
 
         noMoreSong: ->
             if not @collection.models.length
                 return true
-            else if @currentSong and (@collection.indexOf @currentSong) is @collection.models.length
+            else if @currentSong and (@collection.indexOf @currentSong) is (@collection.models.length-1)
                 return true
             else return false
 
+        history: []
+
         play: (song)->
+            if not song.url
+                song = song.toJSON()
             console.log "Now Playing:","\n", song
             @player.attr 'src', song.url
             @player[0].play()
 
         newSong: ->
+            if @currentSong and not @currentSong.get('type')
+                @markSong('s')
+                console.log @currentSong.get('type'), 'Marked Current Song', @currentSong.toJSON()
             if @currentSong
                 index = @collection.indexOf @currentSong
-                newSong = @collection.index(index+1)
+                if index < 0
+                    console.log @currentSong, @collection
+                    console.debug "Not in the queue."
+                    return @collection.at(0)
+                newSong = @collection.at(index+1)
                 return if newSong then newSong else console.debug "No Song.... Totally."
             else
-                @collection.toJSON()[0]
+                @collection.at(0)
+        markSong: (type)->
+            if @currentSong.get 'type'
+                return false
+            @currentSong.set('type', type)
+            @history.push @currentSong.toJSON()
+        like: ->
+            @markSong('r')
+            @next(_.extend (_.clone @option), {type : "r", sid: @currentSong?.get('sid')})
 
+        unlike: ->
+            @markSong('u')
+            @next(_.extend (_.clone @option), {type : "u", sid: @currentSong?.get('sid')})
 
+        trash: ->
+            @markSong('b')
+            @next(_.extend (_.clone @option), {type : "b", sid: @currentSong?.get('sid')})
+
+        skip: ->
+            @markSong('s')
+            @next()
 
 
 
