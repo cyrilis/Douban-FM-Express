@@ -1,0 +1,29 @@
+{
+  "name": "DoubanFM",
+  "version": "0.0.0",
+  "description": "Douban.FM Client powered by Javascript",
+  "main": "index",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cyrilis/Douban-FM-Express.git"
+  },
+  "keywords": [
+    "node-webkit",
+    "atom-shell",
+    "Douban.FM",
+    "douban-fm",
+    "DoubanFM",
+    "doubanfm",
+    "atom",
+    "nw"
+  ],
+  "author": "Cyril Hou <houshoushuai@gmail.com> (http://cyrilis.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cyrilis/Douban-FM-Express/issues"
+  },
+  "homepage": "https://github.com/cyrilis/Douban-FM-Express"
+}
