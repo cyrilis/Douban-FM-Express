@@ -160,6 +160,9 @@ input[data-player="mute"] + label{
 }
 
 .player-controls{
+  *{
+    -webkit-app-region: no-drag;
+  }
   .player-progress{
     position: relative;
     height: 10px;
@@ -179,6 +182,7 @@ input[data-player="mute"] + label{
     font-family: "Avenir Next";
   }
 }
+
 .player-progress input{
   position: absolute;
   top: 0;
@@ -196,6 +200,8 @@ input[data-player="mute"] + label{
   text-align: center;
   margin-top: 15px;
   > div.icon{
+    /* Disable Drag */
+    -webkit-app-region: no-drag;
     color: #dddddd
     transition: color 0.3s
     margin: 0 5px;
@@ -205,6 +211,32 @@ input[data-player="mute"] + label{
     &.pause{
       display: none;
     }
+
+    &.heart{
+      position relative
+      svg {
+        display: block;
+        top: 0;
+        position: absolute;
+        left: 0;
+        transition opacity 0.3s;
+      }
+      &:hover{
+        color: $red;
+      }
+      .player.like + & {
+        color: $red;
+        .icon-heart-broken{
+          display: block;
+        }
+        &:hover{
+          .icon-heart{
+            opacity 0
+          }
+        }
+      }
+    }
+
     &.unheart{
       display: none;
     }

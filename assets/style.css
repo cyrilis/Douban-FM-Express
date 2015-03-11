@@ -141,6 +141,9 @@ input[data-player="mute"] + label {
   display: block;
   width: 100%;
 }
+.player-controls * {
+  -webkit-app-region: no-drag;
+}
 .player-controls .player-progress {
   position: relative;
   height: 10px;
@@ -175,6 +178,8 @@ input[data-player="mute"] + label {
   margin-top: 15px;
 }
 .controls > div.icon {
+/* Disable Drag */
+  -webkit-app-region: no-drag;
   color: #ddd;
   transition: color 0.3s;
   margin: 0 5px;
@@ -184,6 +189,28 @@ input[data-player="mute"] + label {
 }
 .controls > div.icon.pause {
   display: none;
+}
+.controls > div.icon.heart {
+  position: relative;
+}
+.controls > div.icon.heart svg {
+  display: block;
+  top: 0;
+  position: absolute;
+  left: 0;
+  transition: opacity 0.3s;
+}
+.controls > div.icon.heart:hover {
+  color: #ff4e5f;
+}
+.player.like + .controls > div.icon.heart {
+  color: #ff4e5f;
+}
+.player.like + .controls > div.icon.heart .icon-heart-broken {
+  display: block;
+}
+.player.like + .controls > div.icon.heart:hover .icon-heart {
+  opacity: 0;
 }
 .controls > div.icon.unheart {
   display: none;

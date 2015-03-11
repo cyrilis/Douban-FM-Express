@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Douban.FM</title>
-    <script src="https://cdn.plyr.io/1.0.24/plyr.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="assets/plyr.js"></script>
+    <script src="assets/jquery-1.11.2.min.js"></script>
+    <script>
+        try {
+            $ = jQuery = module.exports;
+            // If you want module.exports to be empty, uncomment:
+            // module.exports = {};
+        } catch(e) {}
+    </script>
     <script src="assets/q.js"></script>
     <link rel="stylesheet" href="assets/style.css"/>
 </head>
@@ -222,14 +229,14 @@
     </svg>
 
     <!-- main window -->
-    <div class="main">
+    <div class="main" style="-webkit-app-region: drag">
 
         <div class="album">
             <img src="assets/test_cover.jpg" alt=""/>
         </div>
 
         <div class="player" id="player">
-            <audio controls>
+            <audio controls crossorigin>
                 <source src="https://cdn.selz.com/plyr/1.0/logistics-96-sample.mp3" type="audio/mp3">
             </audio>
         </div>
@@ -246,8 +253,6 @@
             </div>
             <div class="icon heart">
                 <svg class="icon icon-heart"><use xlink:href="#icon-heart"></use></svg>
-            </div>
-            <div class="icon unheart">
                 <svg class="icon icon-heart-broken"><use xlink:href="#icon-heart-broken"></use></svg>
             </div>
             <div class="icon next">
