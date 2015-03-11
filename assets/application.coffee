@@ -1,8 +1,7 @@
 #$ = jQuery = require('./assert/jquery-1.11.2.min.js');
 plyr.setup();
 
-player = document.querySelectorAll(".player")[0].plyr;
-player.play()
+window.player = document.querySelectorAll(".player")[0].plyr;
 
 $(".player-volume").on "input", (e)->
   min = e.target.min
@@ -12,11 +11,6 @@ $(".player-volume").on "input", (e)->
     "backgroundSize": (val - min) * 100 / (max - min) + "% 100%"
   })
 .trigger('input')
-
-# Bind Click pause
-
-$(".controls .icon.play").click ()-> player.play()
-$(".controls .icon.pause").click ()-> player.pause()
 
 API_HOST = "http://www.douban.com"
 #API_HOST = "http://localhost:8080"
@@ -39,6 +33,9 @@ Application = class Application
     @user_name = null
     @sid = null
     @history = []
+    @playlist = []
+    player.media.addEventListener 'ended', ()=>
+      @ended()
 
   fetchChannels: ()->
     $.ajax(CHANNELS_URL)
@@ -77,7 +74,7 @@ Application = class Application
         data.token = @token
         data.expire = @expire
 
-      unless type in ["n", "p"] # Don't need sid.
+      unless type is "n" # Don't need sid.
         data.sid = @sid
 
       if type is "p"
@@ -88,7 +85,9 @@ Application = class Application
         if result.r
           defer.reject(result.err)
         else
-          self.songList = result.song
+          if type is 'p'
+            self.clearHistory()
+          self.playlist = result.song
           if shouldPlay
             self.play(result.song[0])
           defer.resolve(result.song)
@@ -109,8 +108,10 @@ Application = class Application
     if not song
       player.play()
     else
-      @toggleStar(song)
+      @applyHeart(song)
       player.source(song.url)
+      if @sid
+        @addHistory(@sid, "e")
       @sid = song.sid
       @song = song
       player.play()
@@ -120,11 +121,59 @@ Application = class Application
     pic = song.picture.replace("mpic", 'lpic')
     $(".album img").attr('src', pic)
 
-  toggleStar: (song)->
+  applyHeart: (song)->
     star = !!song.like
     $(".player").toggleClass("like", star)
 
+  next: (type)->
+    self = @
+    playedHalf = player.media.duration and player.media.currentTime / player.media.duration > 0.5
+    console.log player.media.duration
+    if playedHalf
+      @addHistory(@sid,type)
+    if @playlist.length
+      @play @playlist.pop()
+    else
+      @fetchSong(type).then ()->
+        self.clearHistory()
+        self.next()
+      , (err)->
+        console.log err
 
+  heart: ()->
+    @fetchSong("r")
 
-d = new Application()
-d.fetchSong("n", true)
+  unheart: ()->
+    @fetchSong("u")
+
+  toggleHeart: ()->
+    hasLike = $("#player").hasClass("like")
+    promise = if hasLike then @unheart() else @heart()
+    promise.then ()->
+      $("#player").toggleClass("like",!hasLike)
+
+  block: ()->
+    @fetchSong("b", true)
+
+  skip: ()->
+    @next()
+
+  ended: ()->
+    @next()
+
+  switchChannel: (id)->
+    @channel = id
+    @playlist = []
+    @next()
+
+fm = new Application()
+fm.next('n')
+
+# Bind Click pause
+
+$(".controls .icon.play").click ()-> player.play()
+$(".controls .icon.pause").click ()-> player.pause()
+$(".controls .icon.next").click ()-> fm.next()
+$(".controls .icon.heart").click ()-> fm.toggleHeart()
+$(".controls .icon.trash").click ()-> fm.block()
+
