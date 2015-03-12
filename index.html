@@ -266,15 +266,26 @@
                     <svg class="icon icon-last"><use xlink:href="#icon-last"></use></svg>
                 </div>
             </div>
-
         </div>
 
         <div class="sidebar">
-            <div class="user"></div>
+            <div class="loading">
+                <svg class="icon icon-spinner10"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-spinner10"></use></svg>
+            </div>
+            <div class="user hide">
+                <div class="avatar"></div>
+                <p class="user-name">Cyril</p>
+                <p class="user-desc">不要说话,不要说话,不要说话,不要说话</p>
+                <button class="button logout">logout</button>
+            </div>
+            <div class="login-form">
+                <label for="user-email">Email:</label>
+                <input id="user-email" type="email"/>
+                <label for="user-password">Password</label>
+                <input id="user-password" type="password"/>
+                <button class="button login">Login</button>
+            </div>
             <div class="channels">
-                <div class="loading">
-                    <svg class="icon icon-spinner10"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-spinner10"></use></svg>
-                </div>
                 <ul>
                 </ul>
             </div>

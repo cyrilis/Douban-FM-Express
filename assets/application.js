@@ -31,11 +31,11 @@
   Application = Application = (function() {
     function Application() {
       this.channel = 1;
-      this.user_id = null;
-      this.token = null;
-      this.expire = null;
-      this.email = null;
-      this.user_name = null;
+      this.user_id = localStorage.getItem("user_id");
+      this.token = localStorage.getItem("token");
+      this.expire = localStorage.getItem("expire");
+      this.email = localStorage.getItem("email");
+      this.user_name = localStorage.getItem("user_name");
       this.sid = null;
       this.history = [];
       this.playlist = [];
@@ -55,21 +55,50 @@
         return $(this).addClass('show');
       });
       $("img").trigger('load');
+      this.initSidebar();
+      $("button.button.login").click((function(_this) {
+        return function() {
+          return _this.login();
+        };
+      })(this));
+      $("button.button.logout").click((function(_this) {
+        return function() {
+          return _this.logout();
+        };
+      })(this));
     }
 
-    Application.prototype.fetchChannels = function() {
-      return $.ajax(CHANNELS_URL);
+    Application.prototype.initSidebar = function() {
+      console.log("Fetching channels");
+      return $.ajax(CHANNELS_URL).done(function(result) {
+        var $channels, channels;
+        console.log(result);
+        channels = result.channels;
+        $(".channels").removeClass("hide");
+        $(".sidebar .loading").addClass("hide");
+        $channels = $(".channels ul");
+        channels.forEach(function(channel) {
+          return $("<li data-id='" + channel.channel_id + "'>" + channel.name + "</li>").appendTo($channels);
+        });
+        return $channels.find("[data-id='" + this.channel + "']").addClass("active");
+      });
     };
 
-    Application.prototype.login = function(email, password) {
-      var defer, self;
+    Application.prototype.login = function() {
+      var defer, email, password, self;
+      email = $("#user-email").val();
+      password = $("#user-password").val();
+      $(".sidebar .loading").removeClass("hide");
+      $(".login-form").addClass("hide");
       self = this;
       defer = new Q.defer();
       if (!email || !password) {
+        this.logout();
         defer.reject({
           err: "Both email and password are needed!"
         });
       } else {
+        console.log("Logging in...");
         $.post(AUTH_URL, {
           app_name: app_name,
           version: version,
@@ -78,18 +107,49 @@
         }).done(function(result) {
           console.log(result);
           if (result.r) {
-            return defer.reject(result.err);
+            defer.reject(result.err);
+            return self.logout();
           } else {
             self.user_id = result.user_id;
             self.token = result.token;
             self.expire = result.expire;
             self.email = result.email;
             self.user_name = result.user_name;
+            localStorage.setItem("user_id", self.user_id);
+            localStorage.setItem("token", self.token);
+            localStorage.setItem("expire", self.expire);
+            localStorage.setItem("email", self.email);
+            localStorage.setItem("user_name", self.user_name);
+            console.log("Fetching user....");
+            $.get("https://api.douban.com/v2/user/" + self.user_id).done(function(result) {
+              console.log("Got user info.");
+              $(".user-name").text(result.name);
+              $(".user-desc").text(result.signature || result.desc);
+              $(".avatar").attr("src", result.avatar);
+              $(".sidebar .loading").addClass("hide");
+              return $(".sidebar .user").removeClass("hide");
+            });
             return defer.resolve(result);
           }
         });
       }
       return defer.promise;
+    };
+
+    Application.prototype.logout = function() {
+      this.user_id = null;
+      this.token = null;
+      this.expire = null;
+      this.email = null;
+      this.user_name = null;
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("token");
+      localStorage.removeItem("expire");
+      localStorage.removeItem("email");
+      localStorage.removeItem("user_name");
+      $(".login-form").removeClass("hide");
+      $(".user").addClass('hide');
+      return $(".sidebar .loading").addClass("hide");
     };
 
     Application.prototype.fetchSong = function(type, shouldPlay) {
@@ -185,6 +245,9 @@
 
     Application.prototype.next = function(type) {
       var playedHalf, self;
+      if (type == null) {
+        type = "e";
+      }
       this.showLoading();
       self = this;
       $(".player-progress-seek").val(0);
@@ -244,6 +307,8 @@
     Application.prototype.switchChannel = function(id) {
       this.channel = id;
       this.playlist = [];
+      $(".channels").find("li.active").removeClass("active");
+      $(".channels").find("li[data-id='" + this.channel + "']").addClass("active");
       return this.next();
     };
 
@@ -273,13 +338,9 @@
   });
 
   $(".album .menu").click(function() {
-    var BrowserWindow, mainWindow, remote, width;
+    var width;
     $(".wrapper").toggleClass("open");
-    width = $(".wrapper").hasClass("open") ? 650 : 450;
-    remote = require('remote');
-    BrowserWindow = remote.require('browser-window');
-    mainWindow = BrowserWindow.getFocusedWindow();
-    return mainWindow.setSize(width, 550);
+    return width = $(".wrapper").hasClass("open") ? 650 : 450;
   });
 
   $(".controls .icon.play").click(function() {

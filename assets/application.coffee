@@ -13,6 +13,7 @@ $(".player-volume").on "input", (e)->
 .trigger('input')
 
 API_HOST = "http://www.douban.com"
+
 #API_HOST = "http://127.0.0.1:8080"
 
 CHANNELS_URL = API_HOST + "/j/app/radio/channels"
@@ -26,11 +27,11 @@ Application = class Application
 
   constructor: ()->
     @channel = 1
-    @user_id = null
-    @token = null
-    @expire = null
-    @email = null
-    @user_name = null
+    @user_id = localStorage.getItem("user_id")
+    @token = localStorage.getItem("token")
+    @expire = localStorage.getItem("expire")
+    @email = localStorage.getItem("email")
+    @user_name = localStorage.getItem("user_name")
     @sid = null
     @history = []
     @playlist = []
@@ -46,20 +47,44 @@ Application = class Application
       $(this).addClass('show')
 
     $("img").trigger('load')
+    @initSidebar()
 
-  fetchChannels: ()->
-    $.ajax(CHANNELS_URL)
+    $("button.button.login").click ()=>
+      @login()
 
-  login: (email, password)->
+    $("button.button.logout").click ()=>
+      @logout()
+
+  initSidebar: ()->
+    console.log "Fetching channels"
+    $.ajax(CHANNELS_URL).done (result)->
+      console.log result
+      channels = result.channels
+      $(".channels").removeClass("hide")
+      $(".sidebar .loading").addClass("hide")
+      $channels = $(".channels ul")
+      channels.forEach (channel)->
+        $("<li data-id='#{channel.channel_id}'>#{channel.name}</li>").appendTo($channels)
+
+      $channels.find("[data-id='#{@channel}']").addClass("active")
+
+  login: ()->
+    email = $("#user-email").val()
+    password = $("#user-password").val()
+    $(".sidebar .loading").removeClass("hide")
+    $(".login-form").addClass("hide")
     self = @
     defer = new Q.defer()
     if not email or not password
+      @logout()
       defer.reject({err: "Both email and password are needed!"})
     else
+      console.log "Logging in..."
       $.post( AUTH_URL, { app_name, version, email, password}).done (result)->
         console.log result
         if result.r
           defer.reject(result.err)
+          self.logout()
         else
           self.user_id = result.user_id
           self.token = result.token
@@ -67,8 +92,41 @@ Application = class Application
           self.email = result.email
           self.user_name = result.user_name
 
+          localStorage.setItem("user_id", self.user_id)
+          localStorage.setItem("token", self.token)
+          localStorage.setItem("expire", self.expire)
+          localStorage.setItem("email", self.email)
+          localStorage.setItem("user_name", self.user_name)
+
+
+          console.log "Fetching user...."
+          $.get("https://api.douban.com/v2/user/#{self.user_id}").done (result)->
+            console.log "Got user info."
+            $(".user-name").text(result.name)
+            $(".user-desc").text(result.signature || result.desc)
+            $(".avatar").attr("src", result.avatar)
+            $(".sidebar .loading").addClass("hide")
+            $(".sidebar .user").removeClass("hide")
+
           defer.resolve(result)
     defer.promise
+
+  logout: ()->
+    @user_id = null
+    @token = null
+    @expire = null
+    @email = null
+    @user_name = null
+
+    localStorage.removeItem("user_id")
+    localStorage.removeItem("token")
+    localStorage.removeItem("expire")
+    localStorage.removeItem("email")
+    localStorage.removeItem("user_name")
+
+    $(".login-form").removeClass("hide")
+    $(".user").addClass('hide')
+    $(".sidebar .loading").addClass("hide")
 
   fetchSong: (type = "n", shouldPlay)->
     console.log "Fetching"
@@ -135,7 +193,7 @@ Application = class Application
     star = !!song.like
     $(".player").toggleClass("like", star)
 
-  next: (type)->
+  next: (type = "e")->
     @showLoading()
     self = @
     $(".player-progress-seek").val(0)
@@ -181,6 +239,8 @@ Application = class Application
   switchChannel: (id)->
     @channel = id
     @playlist = []
+    $(".channels").find("li.active").removeClass("active")
+    $(".channels").find("li[data-id='#{@channel}']").addClass("active")
     @next()
 
   showLoading: ()->
@@ -199,10 +259,10 @@ $(".album .close").click ()-> window.close()
 $(".album .menu").click ()->
   $(".wrapper").toggleClass("open");
   width = if $(".wrapper").hasClass("open") then 650 else 450
-  remote = require('remote');
-  BrowserWindow = remote.require('browser-window');
-  mainWindow = BrowserWindow.getFocusedWindow();
-  mainWindow.setSize(width, 550);
+#  remote = require('remote');
+#  BrowserWindow = remote.require('browser-window');
+#  mainWindow = BrowserWindow.getFocusedWindow();
+#  mainWindow.setSize(width, 550);
 $(".controls .icon.play").click ()-> player.play()
 $(".controls .icon.pause").click ()-> player.pause()
 $(".controls .icon.next").click ()-> fm.next()
