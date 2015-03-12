@@ -38,6 +38,15 @@ Application = class Application
     player.media.addEventListener 'ended', ()=>
       @ended()
 
+    player.media.addEventListener 'canplay', ()=>
+      console.log  "Can Play"
+      @hideLoading()
+
+    $(".album img").load ()->
+      $(this).addClass('show')
+
+    $("img").trigger('load')
+
   fetchChannels: ()->
     $.ajax(CHANNELS_URL)
 
@@ -127,6 +136,7 @@ Application = class Application
     $(".player").toggleClass("like", star)
 
   next: (type)->
+    @showLoading()
     self = @
     $(".player-progress-seek").val(0)
     playedHalf = player.media.duration and player.media.currentTime / player.media.duration > 0.5
@@ -172,6 +182,13 @@ Application = class Application
     @channel = id
     @playlist = []
     @next()
+
+  showLoading: ()->
+    $(".album .loading").addClass("show")
+    $(".album .img").removeClass("show")
+
+  hideLoading: ()->
+    $(".album .loading").removeClass("show")
 
 fm = new Application()
 fm.next('n')

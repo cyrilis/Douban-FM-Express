@@ -45,6 +45,16 @@
           return _this.ended();
         };
       })(this));
+      player.media.addEventListener('canplay', (function(_this) {
+        return function() {
+          console.log("Can Play");
+          return _this.hideLoading();
+        };
+      })(this));
+      $(".album img").load(function() {
+        return $(this).addClass('show');
+      });
+      $("img").trigger('load');
     }
 
     Application.prototype.fetchChannels = function() {
@@ -175,6 +185,7 @@
 
     Application.prototype.next = function(type) {
       var playedHalf, self;
+      this.showLoading();
       self = this;
       $(".player-progress-seek").val(0);
       playedHalf = player.media.duration && player.media.currentTime / player.media.duration > 0.5;
@@ -234,6 +245,15 @@
       this.channel = id;
       this.playlist = [];
       return this.next();
+    };
+
+    Application.prototype.showLoading = function() {
+      $(".album .loading").addClass("show");
+      return $(".album .img").removeClass("show");
+    };
+
+    Application.prototype.hideLoading = function() {
+      return $(".album .loading").removeClass("show");
     };
 
     return Application;
