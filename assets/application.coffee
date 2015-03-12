@@ -34,6 +34,7 @@ Application = class Application
     @sid = null
     @history = []
     @playlist = []
+    @song = null
     player.media.addEventListener 'ended', ()=>
       @ended()
 
@@ -162,6 +163,11 @@ Application = class Application
   ended: ()->
     @next()
 
+  openLink: ()->
+    if @song
+      require('shell').openExternal( "http://music.douban.com#{@song.album}" )
+    return false
+
   switchChannel: (id)->
     @channel = id
     @playlist = []
@@ -171,7 +177,15 @@ fm = new Application()
 fm.next('n')
 
 # Bind Click pause
-
+$(".album .info").click ()-> fm.openLink()
+$(".album .close").click ()-> window.close()
+$(".album .menu").click ()->
+  $(".wrapper").toggleClass("open");
+  width = if $(".wrapper").hasClass("open") then 650 else 450
+  remote = require('remote');
+  BrowserWindow = remote.require('browser-window');
+  mainWindow = BrowserWindow.getFocusedWindow();
+  mainWindow.setSize(width, 550);
 $(".controls .icon.play").click ()-> player.play()
 $(".controls .icon.pause").click ()-> player.pause()
 $(".controls .icon.next").click ()-> fm.next()

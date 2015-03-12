@@ -39,6 +39,7 @@
       this.sid = null;
       this.history = [];
       this.playlist = [];
+      this.song = null;
       player.media.addEventListener('ended', (function(_this) {
         return function() {
           return _this.ended();
@@ -222,6 +223,13 @@
       return this.next();
     };
 
+    Application.prototype.openLink = function() {
+      if (this.song) {
+        require('shell').openExternal("http://music.douban.com" + this.song.album);
+      }
+      return false;
+    };
+
     Application.prototype.switchChannel = function(id) {
       this.channel = id;
       this.playlist = [];
@@ -235,6 +243,24 @@
   fm = new Application();
 
   fm.next('n');
+
+  $(".album .info").click(function() {
+    return fm.openLink();
+  });
+
+  $(".album .close").click(function() {
+    return window.close();
+  });
+
+  $(".album .menu").click(function() {
+    var BrowserWindow, mainWindow, remote, width;
+    $(".wrapper").toggleClass("open");
+    width = $(".wrapper").hasClass("open") ? 650 : 450;
+    remote = require('remote');
+    BrowserWindow = remote.require('browser-window');
+    mainWindow = BrowserWindow.getFocusedWindow();
+    return mainWindow.setSize(width, 550);
+  });
 
   $(".controls .icon.play").click(function() {
     return player.play();

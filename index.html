@@ -227,42 +227,58 @@
         </defs>
     </svg>
 
-    <!-- main window -->
-    <div class="main" style="-webkit-app-region: drag">
 
-        <div class="album">
-            <div class="menu"><svg class="icon icon-equalizer"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-equalizer"></use></svg></div>
-            <div class="info"><svg class="icon icon-info"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-info"></use></svg></div>
-            <div class="close"><svg class="icon icon-cross"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cross"></use></svg></div>
-            <img src="assets/test_cover.jpg" alt=""/>
+    <div class="wrapper">
+        <!-- main window -->
+        <div class="main" style="-webkit-app-region: drag">
+
+            <div class="album">
+                <div class="menu"><svg class="icon icon-equalizer"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-equalizer"></use></svg></div>
+                <div class="info"><svg class="icon icon-info"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-info"></use></svg></div>
+                <div class="close"><svg class="icon icon-cross"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cross"></use></svg></div>
+                <img src="assets/test_cover.jpg" alt=""/>
+            </div>
+
+            <div class="player" id="player">
+                <audio controls crossorigin>
+                    <source src="https://cdn.selz.com/plyr/1.0/logistics-96-sample.mp3" type="audio/mp3">
+                </audio>
+            </div>
+
+            <div class="controls">
+                <div class="icon trash">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                </div>
+                <div class="icon play">
+                    <svg class="icon icon-play3"><use xlink:href="#icon-play3"></use></svg>
+                </div>
+                <div class="icon pause">
+                    <svg class="icon icon-pause2"><use xlink:href="#icon-pause2"></use></svg>
+                </div>
+                <div class="icon heart">
+                    <svg class="icon icon-heart"><use xlink:href="#icon-heart"></use></svg>
+                    <svg class="icon icon-heart-broken"><use xlink:href="#icon-heart-broken"></use></svg>
+                </div>
+                <div class="icon next">
+                    <svg class="icon icon-last"><use xlink:href="#icon-last"></use></svg>
+                </div>
+            </div>
+
         </div>
 
-        <div class="player" id="player">
-            <audio controls crossorigin>
-                <source src="https://cdn.selz.com/plyr/1.0/logistics-96-sample.mp3" type="audio/mp3">
-            </audio>
-        </div>
-
-        <div class="controls">
-            <div class="icon trash">
-                <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-            </div>
-            <div class="icon play">
-                <svg class="icon icon-play3"><use xlink:href="#icon-play3"></use></svg>
-            </div>
-            <div class="icon pause">
-                <svg class="icon icon-pause2"><use xlink:href="#icon-pause2"></use></svg>
-            </div>
-            <div class="icon heart">
-                <svg class="icon icon-heart"><use xlink:href="#icon-heart"></use></svg>
-                <svg class="icon icon-heart-broken"><use xlink:href="#icon-heart-broken"></use></svg>
-            </div>
-            <div class="icon next">
-                <svg class="icon icon-last"><use xlink:href="#icon-last"></use></svg>
+        <div class="sidebar">
+            <div class="user"></div>
+            <div class="channels">
+                <div class="loading">
+                    <svg class="icon icon-spinner10"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-spinner10"></use></svg>
+                </div>
+                <ul>
+                </ul>
             </div>
         </div>
-
     </div>
+
+
 
     <script src="assets/application.js"></script>
 </body>
