@@ -6,10 +6,9 @@
     <script src="assets/plyr.js"></script>
     <script src="assets/jquery-1.11.2.min.js"></script>
     <script>
+        // Fix jQuery in Atom Shell
         try {
             $ = jQuery = module.exports;
-            // If you want module.exports to be empty, uncomment:
-            // module.exports = {};
         } catch(e) {}
     </script>
     <script src="assets/q.js"></script>
@@ -232,6 +231,9 @@
     <div class="main" style="-webkit-app-region: drag">
 
         <div class="album">
+            <div class="menu"><svg class="icon icon-equalizer"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-equalizer"></use></svg></div>
+            <div class="info"><svg class="icon icon-info"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-info"></use></svg></div>
+            <div class="close"><svg class="icon icon-cross"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cross"></use></svg></div>
             <img src="assets/test_cover.jpg" alt=""/>
         </div>
 

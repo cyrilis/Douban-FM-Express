@@ -13,7 +13,7 @@ $(".player-volume").on "input", (e)->
 .trigger('input')
 
 API_HOST = "http://www.douban.com"
-#API_HOST = "http://localhost:8080"
+#API_HOST = "http://127.0.0.1:8080"
 
 CHANNELS_URL = API_HOST + "/j/app/radio/channels"
 AUTH_URL = API_HOST + "/j/app/login"
@@ -127,6 +127,7 @@ Application = class Application
 
   next: (type)->
     self = @
+    $(".player-progress-seek").val(0)
     playedHalf = player.media.duration and player.media.currentTime / player.media.duration > 0.5
     console.log player.media.duration
     if playedHalf

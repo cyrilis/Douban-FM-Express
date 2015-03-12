@@ -175,6 +175,7 @@
     Application.prototype.next = function(type) {
       var playedHalf, self;
       self = this;
+      $(".player-progress-seek").val(0);
       playedHalf = player.media.duration && player.media.currentTime / player.media.duration > 0.5;
       console.log(player.media.duration);
       if (playedHalf) {
