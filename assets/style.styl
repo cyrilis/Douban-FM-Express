@@ -325,9 +325,14 @@ input[data-player="mute"] + label{
         text-overflow ellipsis
         line-height 16px
         transition all 0.3s
+        border-top: 1px solid #434343;
+        border-bottom: 1px solid #1B1B1B;
+        &.active{
+          background: #242424
+        }
         &:hover{
           color: #ffffff;
-          background: #393939
+          background: #252525
         }
       }
     }
