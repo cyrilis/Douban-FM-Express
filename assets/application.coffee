@@ -1,6 +1,8 @@
 #$ = jQuery = require('./assert/jquery-1.11.2.min.js');
 plyr.setup();
 
+__  = (val)-> "\n--------------------------#{val}----------------------------"
+
 window.player = document.querySelectorAll(".player")[0].plyr;
 
 $(".player-volume").on "input", (e)->
@@ -33,7 +35,6 @@ Application = class Application
     @email = localStorage.getItem("email")
     @user_name = localStorage.getItem("user_name")
     @sid = null
-    @history = []
     @playlist = []
     @song = null
     player.media.addEventListener 'ended', ()=>
@@ -55,18 +56,46 @@ Application = class Application
     $("button.button.logout").click ()=>
       @logout()
 
+    @registerShortCut()
+
   initSidebar: ()->
+    self = @
     console.log "Fetching channels"
     $.ajax(CHANNELS_URL).done (result)->
       console.log result
       channels = result.channels
-      $(".channels").removeClass("hide")
-      $(".sidebar .loading").addClass("hide")
+      if self.user_id and self.token and self.expire
+        self.getUserInfo().done ()->
+          $(".channels").removeClass("hide")
+          $(".sidebar .loading").addClass("hide")
+      else
+        $(".channels").removeClass("hide")
+        $(".sidebar .loading").addClass("hide")
       $channels = $(".channels ul")
       channels.forEach (channel)->
-        $("<li data-id='#{channel.channel_id}'>#{channel.name}</li>").appendTo($channels)
+        $("<li data-id='#{channel.channel_id}'>#{channel.name}</li>").appendTo($channels).click (e)->
+          id = $(e.currentTarget).data("id")
+          self.switchChannel(id)
+
 
       $channels.find("[data-id='#{@channel}']").addClass("active")
+
+  getUserInfo:()->
+    self = @
+    $(".sidebar .login-form").addClass("hide")
+    $(".sidebar .loading").removeClass("hide")
+    @user_id = localStorage.getItem("user_id")
+    console.log "Getting User Data"
+    $.get("https://api.douban.com/v2/user/#{@user_id}?apikey=0776da5f62da51f816648f1e288ef5e8").done (result)->
+      console.log "Got user info."
+      $(".user-name").text(result.name)
+      $(".user-desc").text(result.signature || result.desc)
+      $(".avatar").css("background-image", "url(#{result.large_avatar})")
+      $(".sidebar .loading").addClass("hide")
+      $(".sidebar .user").removeClass("hide")
+    .fail (err)->
+      console.log JSON.stringify err
+#      self.logout()
 
   login: ()->
     email = $("#user-email").val()
@@ -98,15 +127,9 @@ Application = class Application
           localStorage.setItem("email", self.email)
           localStorage.setItem("user_name", self.user_name)
 
-
           console.log "Fetching user...."
-          $.get("https://api.douban.com/v2/user/#{self.user_id}").done (result)->
-            console.log "Got user info."
-            $(".user-name").text(result.name)
-            $(".user-desc").text(result.signature || result.desc)
-            $(".avatar").attr("src", result.avatar)
-            $(".sidebar .loading").addClass("hide")
-            $(".sidebar .user").removeClass("hide")
+
+          self.getUserInfo()
 
           defer.resolve(result)
     defer.promise
@@ -128,7 +151,7 @@ Application = class Application
     $(".user").addClass('hide')
     $(".sidebar .loading").addClass("hide")
 
-  fetchSong: (type = "n", shouldPlay)->
+  fetchSong: (type = "n", shouldPlay, sid)->
     console.log "Fetching"
     self  = @
     defer = new Q.defer()
@@ -145,31 +168,28 @@ Application = class Application
       unless type is "n" # Don't need sid.
         data.sid = @sid
 
-      if type is "p"
-        data.h = @getHistory()
+      if type is 'e'
+        data.sid = sid
 
       $.get(PLAYLIST_URL, data).done (result)->
         console.log "Fetched...."
+
+        if type is 'e'
+          return false
+
         if result.r
           defer.reject(result.err)
         else
-          if type is 'p'
-            self.clearHistory()
-          self.playlist = result.song
+          if result.song
+            self.playlist = result.song
+          else
+            console.log "------------------"
+            console.log JSON.stringify result
           if shouldPlay
             self.play(result.song[0])
           defer.resolve(result.song)
 
     defer.promise
-
-  addHistory: (sid, type)->
-    @history.push("#{sid}:#{type}")
-
-  getHistory: ()->
-    "|" + @history.join("|")
-
-  clearHistory: ()->
-    @history = []
 
   play: (song)->
     console.log "play"
@@ -178,8 +198,6 @@ Application = class Application
     else
       @applyHeart(song)
       player.source(song.url)
-      if @sid
-        @addHistory(@sid, "e")
       @sid = song.sid
       @song = song
       player.play()
@@ -188,24 +206,26 @@ Application = class Application
   setAlbum: (song)->
     pic = song.picture.replace("mpic", 'lpic')
     $(".album img").attr('src', pic)
+    $(".information .title").text(song.title)
+    $(".information .artist").text(song.artist)
+    $(".information .album-title").text(song.albumtitle)
 
   applyHeart: (song)->
     star = !!song.like
     $(".player").toggleClass("like", star)
 
-  next: (type = "e")->
+  next: (type = "p")->
     @showLoading()
     self = @
     $(".player-progress-seek").val(0)
     playedHalf = player.media.duration and player.media.currentTime / player.media.duration > 0.5
     console.log player.media.duration
     if playedHalf
-      @addHistory(@sid,type)
+      @sendRecord(@sid)
     if @playlist.length
       @play @playlist.pop()
     else
       @fetchSong(type).then ()->
-        self.clearHistory()
         self.next()
       , (err)->
         console.log err
@@ -221,6 +241,10 @@ Application = class Application
     promise = if hasLike then @unheart() else @heart()
     promise.then ()->
       $("#player").toggleClass("like",!hasLike)
+
+  sendRecord: (sid)->
+    console.log sid
+    @fetchSong('e', null, sid)
 
   block: ()->
     @fetchSong("b", true)
@@ -250,6 +274,27 @@ Application = class Application
   hideLoading: ()->
     $(".album .loading").removeClass("show")
 
+  playOrPause: ()->
+    isPlaying = $(".player").hasClass("playing")
+    if isPlaying
+      player.pause()
+    else
+      player.play()
+
+  registerShortCut: ()->
+    self = @
+    globalShortcut = require('remote').require 'global-shortcut'
+    ret1 = globalShortcut.register("MediaPlayPause", ()-> self.playOrPause())
+    ret2 = globalShortcut.register("MediaNextTrack", ()-> self.next())
+    ret3 = globalShortcut.register("MediaPreviousTrack", ()-> self.heart())
+
+    if ret1 and ret2 and ret3
+      console.log __ "Register Success! "
+    else
+      console.log __ "Register Failed....."
+      console.log ret1, ret1, ret3
+
+
 fm = new Application()
 fm.next('n')
 
@@ -258,11 +303,12 @@ $(".album .info").click ()-> fm.openLink()
 $(".album .close").click ()-> window.close()
 $(".album .menu").click ()->
   $(".wrapper").toggleClass("open");
-  width = if $(".wrapper").hasClass("open") then 650 else 450
-#  remote = require('remote');
-#  BrowserWindow = remote.require('browser-window');
-#  mainWindow = BrowserWindow.getFocusedWindow();
-#  mainWindow.setSize(width, 550);
+  remote = require('remote');
+  expand = $(".wrapper").hasClass("open")
+  width = if expand then 650 else 450
+  BrowserWindow = remote.require('browser-window');
+  mainWindow = BrowserWindow.getFocusedWindow();
+  mainWindow.setSize(width, 550);
 $(".controls .icon.play").click ()-> player.play()
 $(".controls .icon.pause").click ()-> player.pause()
 $(".controls .icon.next").click ()-> fm.next()

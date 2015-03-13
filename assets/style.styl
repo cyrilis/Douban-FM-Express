@@ -189,7 +189,7 @@ input[data-player="mute"] + label{
 .wrapper{
   position: relative;
   width: 350px;
-  margin: 0 auto;
+  margin-left 50px
   transition: width 0.3s;
   &.open{
     width: 550px;
@@ -204,7 +204,7 @@ input[data-player="mute"] + label{
 .main{
   position: absolute;
   top: 50px;
-  right 0;
+  left 0;
   overflow: hidden;
   display: block;
   width: 350px;
@@ -220,10 +220,10 @@ input[data-player="mute"] + label{
 
 .sidebar{
   position: absolute;
-  left: 0
+  right: 0
   top: 70px
   width: 200px;
-  padding-right: 10px;
+  padding-left: 10px;
   height 410px;
   background: #333333
   -webkit-border-radius: 5px;
@@ -240,7 +240,9 @@ input[data-player="mute"] + label{
     height: 100%;
     top: 0
     left: 0
-
+    -webkit-border-radius: 5px
+    -moz-border-radius: 5px
+    border-radius: 5px
     svg{
       margin-top 150px
       margin-left 50px
@@ -261,9 +263,11 @@ input[data-player="mute"] + label{
     .avatar{
       width: 80px;
       height 80px;
+      margin: 0 auto;
       background-repeat: no-repeat;
       background-position: 50%;
       background-color: #444444;
+      background-size cover
       overflow hidden;
       -webkit-border-radius: 50%;
       -moz-border-radius: 50%;
@@ -340,8 +344,8 @@ input[data-player="mute"] + label{
   -webkit-app-region: no-drag;
 }
 .close{
-  right: 0;
-  top: 0;
+  left: 10px;
+  top: 10px;
   font-size: 16px;
   width: 32px;
   height: 32px;
@@ -366,7 +370,7 @@ input[data-player="mute"] + label{
 }
 .menu, .info{
   top: 20px;
-  left: 20px;
+  right: 20px;
   color: #ccc;
   width: 32px;
   height: 32px;
@@ -410,7 +414,7 @@ input[data-player="mute"] + label{
   }
   &:hover{
     &:after{
-      opacity 1
+      opacity 0
     }
   }
   .loading{
@@ -436,6 +440,47 @@ input[data-player="mute"] + label{
     }
   }
 }
+
+.information{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40%;
+  color #ffffff
+  font-size: 18px
+  line-height: 25px
+  box-sizing border-box
+  padding: 0 18px
+  text-align right
+  left: 0;
+  opacity: 0.8;
+  transition: all 0.3s
+  background: linear-gradient(to bottom, rgba(72,76,97,0) 0%, rgba(72,76,97,1) 70%);
+  transform: translate3d(0, 40%, 0);
+  pointer-events: none;
+  -webkit-border-radius: 0 0 5px 5px
+  -moz-border-radius: 0 0 5px 5px
+  border-radius: 0 0 5px 5px
+  div{
+    overflow hidden
+    white-space nowrap
+    text-overflow ellipsis
+  }
+  .artist{
+    font-size: 14px
+    color: #cccccc
+  }
+  .album-title{
+    font-size: 14px
+    color: #cccccc
+  }
+  .album:hover & {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+
 .album img{
   display: block;
   width: 100%;
