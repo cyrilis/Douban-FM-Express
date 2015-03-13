@@ -237,10 +237,13 @@ Application = class Application
     @fetchSong("u")
 
   toggleHeart: ()->
+    self = @
     hasLike = $("#player").hasClass("like")
     promise = if hasLike then @unheart() else @heart()
+    sid = @sid
     promise.then ()->
-      $("#player").toggleClass("like",!hasLike)
+      if sid is self.sid
+        $("#player").toggleClass("like",!hasLike)
 
   sendRecord: (sid)->
     console.log sid
@@ -308,7 +311,14 @@ $(".album .menu").click ()->
   width = if expand then 650 else 450
   BrowserWindow = remote.require('browser-window');
   mainWindow = BrowserWindow.getFocusedWindow();
-  mainWindow.setSize(width, 550);
+  if expand
+    if window._delay
+      window.clearTimeout( window._delay )
+    mainWindow.setSize(width, 550);
+  else
+    window._delay = window.setTimeout ()->
+      mainWindow.setSize(width, 550)
+    , 300
 $(".controls .icon.play").click ()-> player.play()
 $(".controls .icon.pause").click ()-> player.pause()
 $(".controls .icon.next").click ()-> fm.next()

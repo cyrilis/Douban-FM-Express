@@ -298,11 +298,15 @@
     };
 
     Application.prototype.toggleHeart = function() {
-      var hasLike, promise;
+      var hasLike, promise, self, sid;
+      self = this;
       hasLike = $("#player").hasClass("like");
       promise = hasLike ? this.unheart() : this.heart();
+      sid = this.sid;
       return promise.then(function() {
-        return $("#player").toggleClass("like", !hasLike);
+        if (sid === self.sid) {
+          return $("#player").toggleClass("like", !hasLike);
+        }
       });
     };
 
@@ -402,7 +406,16 @@
     width = expand ? 650 : 450;
     BrowserWindow = remote.require('browser-window');
     mainWindow = BrowserWindow.getFocusedWindow();
-    return mainWindow.setSize(width, 550);
+    if (expand) {
+      if (window._delay) {
+        window.clearTimeout(window._delay);
+      }
+      return mainWindow.setSize(width, 550);
+    } else {
+      return window._delay = window.setTimeout(function() {
+        return mainWindow.setSize(width, 550);
+      }, 300);
+    }
   });
 
   $(".controls .icon.play").click(function() {
