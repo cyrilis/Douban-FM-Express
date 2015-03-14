@@ -28,7 +28,7 @@ version = 100
 Application = class Application
 
   constructor: ()->
-    @channel = 1
+    @channel = 0
     @user_id = localStorage.getItem("user_id")
     @token = localStorage.getItem("token")
     @expire = localStorage.getItem("expire")
@@ -76,6 +76,7 @@ Application = class Application
         $("<li data-id='#{channel.channel_id}'>#{channel.name}</li>").appendTo($channels).click (e)->
           id = $(e.currentTarget).data("id")
           self.switchChannel(id)
+      $(".channels").find("li[data-id='#{self.channel}']").addClass("active")
 
 
       $channels.find("[data-id='#{@channel}']").addClass("active")
@@ -250,6 +251,7 @@ Application = class Application
     @fetchSong('e', null, sid)
 
   block: ()->
+    player.pause()
     @fetchSong("b", true)
 
   skip: ()->
@@ -268,6 +270,7 @@ Application = class Application
     @playlist = []
     $(".channels").find("li.active").removeClass("active")
     $(".channels").find("li[data-id='#{@channel}']").addClass("active")
+    player.pause()
     @next()
 
   showLoading: ()->

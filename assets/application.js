@@ -34,7 +34,7 @@
 
   Application = Application = (function() {
     function Application() {
-      this.channel = 1;
+      this.channel = 0;
       this.user_id = localStorage.getItem("user_id");
       this.token = localStorage.getItem("token");
       this.expire = localStorage.getItem("expire");
@@ -97,6 +97,7 @@
             return self.switchChannel(id);
           });
         });
+        $(".channels").find("li[data-id='" + self.channel + "']").addClass("active");
         return $channels.find("[data-id='" + this.channel + "']").addClass("active");
       });
     };
@@ -316,6 +317,7 @@
     };
 
     Application.prototype.block = function() {
+      player.pause();
       return this.fetchSong("b", true);
     };
 
@@ -339,6 +341,7 @@
       this.playlist = [];
       $(".channels").find("li.active").removeClass("active");
       $(".channels").find("li[data-id='" + this.channel + "']").addClass("active");
+      player.pause();
       return this.next();
     };
 

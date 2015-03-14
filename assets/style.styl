@@ -4,6 +4,7 @@ body{
   margin: 0;
   padding: 0;
   font-family "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif
+  user-select none
 }
 .hide{
   display none;
@@ -231,6 +232,7 @@ input[data-player="mute"] + label{
   border-radius: 5px;
   box-shadow: 0 0 0 rgba(0, 0, 0, 0.6);
   z-index: -1;
+  transition all 0.3s
   .loading{
     position: absolute
     color: #ffffff;
@@ -309,11 +311,12 @@ input[data-player="mute"] + label{
     border-top 1px solid #393939
     padding-top 4px
     margin-top 4px;
+    border-bottom 1px solid #000000
     ul{
       margin: 0;
       padding: 0;
       list-style none;
-      font-size 14px;
+      font-size 16px;
       li{
         cursor pointer;
         padding: 5px 10px;
@@ -323,7 +326,7 @@ input[data-player="mute"] + label{
         width: 180px
         color: #cccccc;
         text-overflow ellipsis
-        line-height 16px
+        line-height 20px
         transition all 0.3s
         border-top: 1px solid #434343;
         border-bottom: 1px solid #1B1B1B;
@@ -333,6 +336,9 @@ input[data-player="mute"] + label{
         &:hover{
           color: #ffffff;
           background: #252525
+        }
+        &:last-child{
+          border-bottom 0
         }
       }
     }

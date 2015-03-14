@@ -2,6 +2,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+  user-select: none;
 }
 .hide {
   display: none;
@@ -210,6 +211,7 @@ input[data-player="mute"] + label {
   border-radius: 5px;
   box-shadow: 0 0 0 rgba(0,0,0,0.6);
   z-index: -1;
+  transition: all 0.3s;
 }
 .sidebar .loading {
   position: absolute;
@@ -288,12 +290,13 @@ input[data-player="mute"] + label {
   border-top: 1px solid #393939;
   padding-top: 4px;
   margin-top: 4px;
+  border-bottom: 1px solid #000;
 }
 .sidebar .channels ul {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 14px;
+  font-size: 16px;
 }
 .sidebar .channels ul li {
   cursor: pointer;
@@ -304,7 +307,7 @@ input[data-player="mute"] + label {
   width: 180px;
   color: #ccc;
   text-overflow: ellipsis;
-  line-height: 16px;
+  line-height: 20px;
   transition: all 0.3s;
   border-top: 1px solid #434343;
   border-bottom: 1px solid #1b1b1b;
@@ -315,6 +318,9 @@ input[data-player="mute"] + label {
 .sidebar .channels ul li:hover {
   color: #fff;
   background: #252525;
+}
+.sidebar .channels ul li:last-child {
+  border-bottom: 0;
 }
 .menu,
 .info,
