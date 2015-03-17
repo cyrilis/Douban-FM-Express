@@ -517,14 +517,26 @@ input[data-player="mute"] + label {
 .controls > div.icon {
 /* Disable Drag */
   -webkit-app-region: no-drag;
+  display: inline-block;
   color: #ddd;
-  transition: color 0.3s;
   margin: 0 5px;
+  position: relative;
+  vertical-align: middle;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -ms-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
 }
 .controls > div.icon.play {
   display: inline-block;
+  font-size: 42px;
+  line-height: 36px;
 }
-.controls > div.icon.pause {
+.controls > div.icon.play .icon-play {
+  display: block;
+}
+.controls > div.icon.play .icon-pause {
   display: none;
 }
 .controls > div.icon.heart {
@@ -555,11 +567,36 @@ input[data-player="mute"] + label {
 .controls > div.icon:hover {
   color: #fff;
 }
-.player.playing + .controls .icon.play {
+.controls > div.icon:after {
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  content: '';
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  top: -2px;
+  left: -2px;
+  padding: 2px;
+  z-index: 0;
+  background: #fff;
+  -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  transform: scale(0);
+}
+.controls > div.icon.animated:after {
+  -webkit-animation: ripple 0.2s forwards, fadeout 0.3s forwards;
+  -o-animation: ripple 0.2s forwards, fadeout 0.3s forwards;
+  animation: ripple 0.2s forwards, fadeout 0.3s forwards;
+}
+.player.playing + .controls .play .icon-play {
   display: none;
 }
-.player.playing + .controls .icon.pause {
-  display: inline-block;
+.player.playing + .controls .play .icon-pause {
+  display: block;
 }
 @-moz-keyframes rotation {
   from {
@@ -591,5 +628,69 @@ input[data-player="mute"] + label {
   }
   to {
     transform: rotate(359deg);
+  }
+}
+@-moz-keyframes ripple {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(2);
+  }
+}
+@-webkit-keyframes ripple {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(2);
+  }
+}
+@-o-keyframes ripple {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(2);
+  }
+}
+@keyframes ripple {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(2);
+  }
+}
+@-moz-keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@-o-keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }

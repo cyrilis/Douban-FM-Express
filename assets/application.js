@@ -69,6 +69,12 @@
           return _this.logout();
         };
       })(this));
+      $(".icon").bind("webkitAnimationEnd mozAnimationEnd animationEnd", function() {
+        return $(this).removeClass("animated");
+      });
+      $(".icon").click(function() {
+        return $(this).addClass("animated");
+      });
       this.registerShortCut();
     }
 
@@ -422,11 +428,7 @@
   });
 
   $(".controls .icon.play").click(function() {
-    return player.play();
-  });
-
-  $(".controls .icon.pause").click(function() {
-    return player.pause();
+    return fm.playOrPause();
   });
 
   $(".controls .icon.next").click(function() {

@@ -56,6 +56,12 @@ Application = class Application
     $("button.button.logout").click ()=>
       @logout()
 
+    $(".icon").bind "webkitAnimationEnd mozAnimationEnd animationEnd", ()->
+      $(this).removeClass("animated")
+
+    $(".icon").click ()->
+      $(this).addClass("animated")
+
     @registerShortCut()
 
   initSidebar: ()->
@@ -304,7 +310,6 @@ Application = class Application
 fm = new Application()
 fm.next('n')
 
-# Bind Click pause
 $(".album .info").click ()-> fm.openLink()
 $(".album .close").click ()-> window.close()
 $(".album .menu").click ()->
@@ -322,8 +327,7 @@ $(".album .menu").click ()->
     window._delay = window.setTimeout ()->
       mainWindow.setSize(width, 550)
     , 300
-$(".controls .icon.play").click ()-> player.play()
-$(".controls .icon.pause").click ()-> player.pause()
+$(".controls .icon.play").click ()-> fm.playOrPause()
 $(".controls .icon.next").click ()-> fm.next()
 $(".controls .icon.heart").click ()-> fm.toggleHeart()
 $(".controls .icon.trash").click ()-> fm.block()
