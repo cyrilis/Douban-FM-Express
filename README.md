@@ -1,5 +1,6 @@
 Douban-FM-Express
 ==================
+DoubanFM Desktop Client Powered by Atom-shell.
 
 More info:  http://cyrilis.com/20130625.html
 
@@ -37,7 +38,7 @@ Usage(Develop):
    
    atom-shell .
 
-   Here we go!
+   # Here we go!
 ```
 Usage(Production):
 -----------
