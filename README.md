@@ -42,7 +42,8 @@ Usage(Develop):
 ```
 Usage(Production):
 -----------
-Download Mac binary file from release page. run DoubanFM.app.
+
+Download Mac binary file from [release page](https://github.com/cyrilis/Douban-FM-Express/releases). run DoubanFM.app.
 
 Todo:
 -----------
