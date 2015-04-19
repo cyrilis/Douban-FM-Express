@@ -2,7 +2,7 @@ Douban-FM-Express
 ==================
 DoubanFM Desktop Client Powered by Atom-shell.
 
-More info:  http://cyrilis.com/20130625.html
+More info:  http://cyrilis.com/posts/another-doubanfm-implementation
 
 [Updated: 2015-03-22]
 > Changed from Node-webkit to Atom-shell.
@@ -17,7 +17,11 @@ Features:
 
 Screenshot:
 -----------
-![](http://s3.again.cc/capture/2015-03-22_160322.png)
+<a href="http://s3.again.cc/capture/2015-04-19_233548.png" target="_blank" title="点击查看大图"><img src="http://s3.again.cc/capture/2015-04-19_233548.png" style="width: 430px" alt="DoubanFM screenshot-1"></a>
+<a href="http://s3.again.cc/capture/2015-04-19_234127.png" target="_blank" title="点击查看大图"><img src="http://s3.again.cc/capture/2015-04-19_234127.png" style="width: 320px" alt="DoubanFM screenshot-1"></a>
+<video id="video1" style="width: 100%" loop="loop" autoplay>
+    <source src="http://s3.again.cc/capture/DoubanFM-2015-04-19.mp4" type="video/mp4">
+</video>
 
 Dependencies:
 -----------
