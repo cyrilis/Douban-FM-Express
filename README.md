@@ -1,5 +1,10 @@
 Douban-FM-Express
 ==================
+
+###Declaration: Deprecated due to the api change of http://douban.fm
+
+-----
+
 DoubanFM Desktop Client Powered by Atom-shell.
 
 More info:  http://cyrilis.com/posts/another-doubanfm-implementation
